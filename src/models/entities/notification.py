@@ -19,7 +19,11 @@ class Notification(UpdatableDeletableEntity):
     pk_uuid = Synonym("notification_uuid")
 
     user_uuid: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), ForeignKey("users.user_uuid"), nullable=False)
-    expense_uuid: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), ForeignKey("expenses.expense_uuid"), nullable=False)
+    expense_uuid: Mapped[uuid.UUID] = mapped_column(
+        UUID(as_uuid=True),
+        ForeignKey("expenses.expense_uuid"),
+        nullable=False,
+    )
 
     title: Mapped[str] = mapped_column(VARCHAR(200), nullable=False)
     message: Mapped[str] = mapped_column(Text, nullable=False)
