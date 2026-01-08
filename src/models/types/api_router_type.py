@@ -7,6 +7,9 @@ class ApiRouterType(Enum):
     REFERRAL = "🤝 REFERRAL"
     OBJECT_STORAGE = "🏪 Object Storage"
     FILE = "📂 Files"
+    EXPENSE = "📉 EXPENSE"
+    INCOME = "📈 INCOME"
+    NOTIFICATION = "🔔 NOTIFICATION"
 
     # ADMINs
     ADMIN_AUTH = "⚖ ADMIN AUTH"

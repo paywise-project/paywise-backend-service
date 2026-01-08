@@ -5,7 +5,10 @@ from dependency_injector import containers, providers
 from src.configs.runtime_config import RuntimeConfig
 from src.logics.admin.admin_logic import AdminLogic
 from src.logics.auth.auth_logic import AuthLogic
+from src.logics.expense.expense_logic import ExpenseLogic
 from src.logics.file.file_logic import FileLogic
+from src.logics.income.income_logic import IncomeLogic
+from src.logics.notification.notification_logic import NotificationLogic
 from src.logics.referral.referral_logic import ReferralLogic
 from src.logics.storage.storage_logic import StorageLogic
 from src.logics.user.user_logic import UserLogic
@@ -13,8 +16,14 @@ from src.repositories.admin.adapters.admin_postgres_adapter import AdminPostgres
 from src.repositories.admin.admin_repository import AdminRepository
 from src.repositories.auth.adapters.auth_redis_adapter import AuthRedisAdapter
 from src.repositories.auth.auth_repository import AuthRepository
+from src.repositories.expense.adapters.expense_postgres_adapter import ExpensePostgresAdapter
+from src.repositories.expense.expense_repository import ExpenseRepository
 from src.repositories.file.adapters.file_postgres_adapter import FilePostgresAdapter
 from src.repositories.file.file_repository import FileRepository
+from src.repositories.income.adapters.income_postgres_adapter import IncomePostgresAdapter
+from src.repositories.income.income_repository import IncomeRepository
+from src.repositories.notification.adapters.notification_postgres_adapter import NotificationPostgresAdapter
+from src.repositories.notification.notification_repository import NotificationRepository
 from src.repositories.referral.adapters.referral_postgres_adapter import ReferralPostgresAdapter
 from src.repositories.referral.referral_repository import ReferralRepository
 from src.repositories.storage.adapters.system_storage_adapter import SystemStorageAdapter
@@ -111,5 +120,50 @@ class ServiceContainer(containers.DeclarativeContainer):
     admin_logic = providers.ThreadSafeSingleton(
         AdminLogic,
         repository=_admin_repository,
+    )
+    # endregion
+
+    # region expense
+    _expense_postgres_adapter = providers.ThreadSafeSingleton(
+        ExpensePostgresAdapter,
+        adapter=_postgres_adapter,
+    )
+    _expense_repository = providers.ThreadSafeSingleton(
+        ExpenseRepository,
+        postgres_adapter=_expense_postgres_adapter,
+    )
+    expense_logic = providers.ThreadSafeSingleton(
+        ExpenseLogic,
+        repository=_expense_repository,
+    )
+    # endregion
+
+    # region income
+    _income_postgres_adapter = providers.ThreadSafeSingleton(
+        IncomePostgresAdapter,
+        adapter=_postgres_adapter,
+    )
+    _income_repository = providers.ThreadSafeSingleton(
+        IncomeRepository,
+        postgres_adapter=_income_postgres_adapter,
+    )
+    income_logic = providers.ThreadSafeSingleton(
+        IncomeLogic,
+        repository=_income_repository,
+    )
+    # endregion
+
+    # region notification
+    _notification_postgres_adapter = providers.ThreadSafeSingleton(
+        NotificationPostgresAdapter,
+        adapter=_postgres_adapter,
+    )
+    _notification_repository = providers.ThreadSafeSingleton(
+        NotificationRepository,
+        postgres_adapter=_notification_postgres_adapter,
+    )
+    notification_logic = providers.ThreadSafeSingleton(
+        NotificationLogic,
+        repository=_notification_repository,
     )
     # endregion
