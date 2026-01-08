@@ -7,7 +7,7 @@ from sqlalchemy.dialects.postgresql import UUID, VARCHAR
 from sqlalchemy.orm import Mapped, mapped_column, relationship, Synonym
 
 
-class Expense(UpdatableDeletableEntity):
+class ExpenseEntity(UpdatableDeletableEntity):
     __tablename__ = "expenses"
 
     expense_uuid = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)

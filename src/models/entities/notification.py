@@ -12,7 +12,7 @@ from sqlalchemy.orm import Mapped, mapped_column, relationship, Synonym
 from sqlalchemy.sql import func
 
 
-class Notification(UpdatableDeletableEntity):
+class NotificationEntity(UpdatableDeletableEntity):
     __tablename__ = "notifications"
 
     notification_uuid = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
