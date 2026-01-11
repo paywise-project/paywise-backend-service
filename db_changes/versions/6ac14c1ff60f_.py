@@ -1,8 +1,8 @@
 """empty message
 
-Revision ID: 125904803ea5
+Revision ID: 6ac14c1ff60f
 Revises:
-Create Date: 2025-12-17 23:54:28.858574
+Create Date: 2026-01-11 17:46:43.869440
 
 """
 
@@ -13,7 +13,7 @@ import sqlalchemy as sa
 
 
 # revision identifiers, used by Alembic.
-revision: str = "125904803ea5"
+revision: str = "6ac14c1ff60f"
 down_revision: Union[str, Sequence[str], None] = None
 branch_labels: Union[str, Sequence[str], None] = None
 depends_on: Union[str, Sequence[str], None] = None
@@ -44,15 +44,41 @@ def upgrade() -> None:
         sa.Column("phone_number", sa.VARCHAR(length=15), nullable=False),
         sa.Column("username", sa.VARCHAR(length=50), nullable=True),
         sa.Column("hashed_password", sa.VARCHAR(length=255), nullable=True),
+        sa.Column("email", sa.VARCHAR(length=255), nullable=True),
         sa.Column("profile_picture_path", sa.VARCHAR(length=500), nullable=True),
         sa.Column("user_type", sa.VARCHAR(length=20), nullable=False),
         sa.Column("user_status", sa.VARCHAR(length=20), nullable=False),
         sa.Column("gender_type", sa.VARCHAR(length=30), nullable=True),
+        sa.Column("fcm_token", sa.VARCHAR(length=500), nullable=True),
         sa.Column("created_at", sa.DateTime(), server_default=sa.text("now()"), nullable=False),
         sa.Column("updated_at", sa.DateTime(), server_default=sa.text("now()"), nullable=False),
         sa.Column("is_deleted", sa.Boolean(), nullable=False),
         sa.PrimaryKeyConstraint("user_uuid"),
         sa.UniqueConstraint("phone_number"),
+    )
+    op.create_table(
+        "expenses",
+        sa.Column("expense_uuid", sa.UUID(), nullable=False),
+        sa.Column("user_uuid", sa.UUID(), nullable=False),
+        sa.Column("title", sa.VARCHAR(length=200), nullable=False),
+        sa.Column("amount", sa.Integer(), nullable=False),
+        sa.Column("category", sa.VARCHAR(length=20), nullable=False),
+        sa.Column("day_of_month", sa.Integer(), nullable=False),
+        sa.Column("status_type", sa.VARCHAR(length=20), nullable=False),
+        sa.Column("count", sa.Integer(), nullable=True),
+        sa.Column("is_active", sa.Boolean(), nullable=False),
+        sa.Column("notify_week_before", sa.Boolean(), nullable=False),
+        sa.Column("notify_day_before", sa.Boolean(), nullable=False),
+        sa.Column("notify_on_day", sa.Boolean(), nullable=False),
+        sa.Column("notes", sa.Text(), nullable=True),
+        sa.Column("created_at", sa.DateTime(), server_default=sa.text("now()"), nullable=False),
+        sa.Column("updated_at", sa.DateTime(), server_default=sa.text("now()"), nullable=False),
+        sa.Column("is_deleted", sa.Boolean(), nullable=False),
+        sa.ForeignKeyConstraint(
+            ["user_uuid"],
+            ["users.user_uuid"],
+        ),
+        sa.PrimaryKeyConstraint("expense_uuid"),
     )
     op.create_table(
         "files",
@@ -79,6 +105,25 @@ def upgrade() -> None:
         sa.PrimaryKeyConstraint("file_uuid"),
     )
     op.create_table(
+        "incomes",
+        sa.Column("income_uuid", sa.UUID(), nullable=False),
+        sa.Column("user_uuid", sa.UUID(), nullable=False),
+        sa.Column("title", sa.VARCHAR(length=200), nullable=False),
+        sa.Column("amount", sa.Integer(), nullable=False),
+        sa.Column("day_of_month", sa.Integer(), nullable=False),
+        sa.Column("count", sa.Integer(), nullable=True),
+        sa.Column("is_active", sa.Boolean(), nullable=False),
+        sa.Column("notes", sa.Text(), nullable=True),
+        sa.Column("created_at", sa.DateTime(), server_default=sa.text("now()"), nullable=False),
+        sa.Column("updated_at", sa.DateTime(), server_default=sa.text("now()"), nullable=False),
+        sa.Column("is_deleted", sa.Boolean(), nullable=False),
+        sa.ForeignKeyConstraint(
+            ["user_uuid"],
+            ["users.user_uuid"],
+        ),
+        sa.PrimaryKeyConstraint("income_uuid"),
+    )
+    op.create_table(
         "referrals",
         sa.Column("referral_uuid", sa.UUID(), nullable=False),
         sa.Column("referee_uuid", sa.UUID(), nullable=False),
@@ -96,14 +141,39 @@ def upgrade() -> None:
         ),
         sa.PrimaryKeyConstraint("referral_uuid"),
     )
+    op.create_table(
+        "notifications",
+        sa.Column("notification_uuid", sa.UUID(), nullable=False),
+        sa.Column("user_uuid", sa.UUID(), nullable=False),
+        sa.Column("expense_uuid", sa.UUID(), nullable=False),
+        sa.Column("title", sa.VARCHAR(length=200), nullable=False),
+        sa.Column("message", sa.Text(), nullable=False),
+        sa.Column("notification_type", sa.VARCHAR(length=20), nullable=False),
+        sa.Column("sent_at", sa.DateTime(), server_default=sa.text("now()"), nullable=False),
+        sa.Column("created_at", sa.DateTime(), server_default=sa.text("now()"), nullable=False),
+        sa.Column("updated_at", sa.DateTime(), server_default=sa.text("now()"), nullable=False),
+        sa.Column("is_deleted", sa.Boolean(), nullable=False),
+        sa.ForeignKeyConstraint(
+            ["expense_uuid"],
+            ["expenses.expense_uuid"],
+        ),
+        sa.ForeignKeyConstraint(
+            ["user_uuid"],
+            ["users.user_uuid"],
+        ),
+        sa.PrimaryKeyConstraint("notification_uuid"),
+    )
     # ### end Alembic commands ###
 
 
 def downgrade() -> None:
     """Downgrade schema."""
     # ### commands auto generated by Alembic - please adjust! ###
+    op.drop_table("notifications")
     op.drop_table("referrals")
+    op.drop_table("incomes")
     op.drop_table("files")
+    op.drop_table("expenses")
     op.drop_table("users")
     op.drop_table("app_configs")
     # ### end Alembic commands ###

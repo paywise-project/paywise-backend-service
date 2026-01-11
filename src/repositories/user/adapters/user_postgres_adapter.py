@@ -35,8 +35,8 @@ class UserPostgresAdapter(SQLAlchemyFilterMixin):
         self._adapter: AsyncPostgresSQLAlchemyAdapter = adapter
 
     async def create_user(self, input_dto: CreateUserCommandDTO) -> CreateUserResponseDTO:
-        user: UserEntity = UserEntity(phone_number=input_dto.phone_number)
-        result = await self._adapter.create(entity=user)
+        _entity = UserEntity(**input_dto.model_dump())
+        result = await self._adapter.create(entity=_entity)
         return CreateUserResponseDTO.model_validate(obj=result)
 
     async def get_user(self, input_dto: GetUserQueryDTO) -> GetUserResponseDTO:
@@ -48,48 +48,64 @@ class UserPostgresAdapter(SQLAlchemyFilterMixin):
             operation=FilterOperationType.EQUAL,
         )
         result = await self._adapter.execute(statement=_query)
-        user = result.scalar()
+        entity = result.scalar()
 
-        if not user:
+        if not entity:
             raise NotFoundError(resource_type=UserEntity.__name__)
 
-        return GetUserResponseDTO.model_validate(obj=user)
+        return GetUserResponseDTO.model_validate(obj=entity)
 
-    async def get_admin_auth_user(self, input_dto: GetUserQueryDTO) -> GetUserResponseDTO:
-        _query = select(UserEntity)
-        _query = self._apply_filter(
-            query=_query,
-            field=UserEntity.user_uuid,
-            value=input_dto.user_uuid,
-            operation=FilterOperationType.EQUAL,
-        )
-        _query = self._apply_filter(
-            query=_query,
-            field=UserEntity.username,
-            operation=FilterOperationType.IS_NOT_NULL,
-            value="",
-        )
-        _query = self._apply_filter(
-            query=_query,
-            field=UserEntity.user_type,
-            value=[
-                UserType.ADMIN,
-            ],
-            operation=FilterOperationType.IN_LIST,
-        )
-        _query = self._apply_filter(
-            query=_query,
-            field=UserEntity.is_deleted,
-            value=False,
-            operation=FilterOperationType.EQUAL,
-        )
-        result = await self._adapter.execute(statement=_query)
-        user = result.scalar()
+    async def search_users(self, input_dto: SearchUserQueryDTO) -> SearchUserResponseDTO:
+        query: Select = select(UserEntity).where(UserEntity.is_deleted.is_(False))
 
-        if not user:
+        if input_dto.user_uuid:
+            query = self._apply_filter(
+                query=query,
+                field=UserEntity.user_uuid,
+                value=input_dto.user_uuid,
+                operation=FilterOperationType.EQUAL,
+            )
+
+        entities, total = await self._adapter.execute_search_query(
+            query=query,
+            entity=UserEntity,
+            sort_info=input_dto.sort_info,
+            pagination=input_dto.pagination,
+        )
+
+        return SearchUserResponseDTO(users=entities, total=total)
+
+    async def update_user(self, input_dto: UpdateUserCommandDTO) -> None:
+        update_data = input_dto.model_dump(exclude={"user_uuid"}, exclude_none=True)
+        if not update_data:
+            return
+
+        update_query: Update = (
+            update(UserEntity)
+            .where(
+                UserEntity.user_uuid == input_dto.user_uuid,
+                UserEntity.is_deleted.is_(False),
+            )
+            .values(**update_data)
+        )
+
+        result = await self._adapter.execute(statement=update_query)
+        if result.rowcount == 0:
             raise NotFoundError(resource_type=UserEntity.__name__)
 
-        return GetUserResponseDTO.model_validate(obj=user)
+    async def delete_user(self, input_dto: DeleteUserCommandDTO) -> None:
+        delete_query = (
+            update(UserEntity)
+            .where(
+                UserEntity.user_uuid == input_dto.user_uuid,
+                UserEntity.is_deleted.is_(False),
+            )
+            .values(is_deleted=True)
+        )
+
+        result = await self._adapter.execute(statement=delete_query)
+        if result.rowcount == 0:
+            raise NotFoundError(resource_type=UserEntity.__name__)
 
     async def get_admin_user(self, input_dto: GetAdminUserQueryDTO) -> GetAdminUserResponseDTO:
         _query = select(UserEntity)
@@ -126,64 +142,41 @@ class UserPostgresAdapter(SQLAlchemyFilterMixin):
 
         return GetAdminUserResponseDTO.model_validate(obj=user)
 
-    async def search_users(self, input_dto: SearchUserQueryDTO) -> SearchUserResponseDTO:
-        query: Select = select(UserEntity)
-
-        if input_dto.first_name:
-            query = self._apply_filter(
-                query=query,
-                field=UserEntity.first_name,
-                value=f"%{input_dto.first_name}%",
-                operation=FilterOperationType.ILIKE,
-            )
-
-        if input_dto.last_name:
-            query = self._apply_filter(
-                query=query,
-                field=UserEntity.last_name,
-                value=f"%{input_dto.last_name}%",
-                operation=FilterOperationType.ILIKE,
-            )
-        if input_dto.full_name:
-            full_name_filters = [
-                func.concat(UserEntity.first_name, " ", UserEntity.last_name).ilike(
-                    f"%{input_dto.full_name}%",
-                ),
-            ] + [
-                func.concat(UserEntity.last_name, " ", UserEntity.first_name).ilike(
-                    f"%{input_dto.full_name}%",
-                ),
-            ]
-            query = query.filter(or_(*full_name_filters))
-
-        users, total = await self._adapter.execute_search_query(
-            query=query,
-            entity=UserEntity,
-            sort_info=input_dto.sort_info,
-            pagination=input_dto.pagination,
+    async def get_admin_auth_user(self, input_dto: GetUserQueryDTO) -> GetUserResponseDTO:
+        _query = select(UserEntity)
+        _query = self._apply_filter(
+            query=_query,
+            field=UserEntity.user_uuid,
+            value=input_dto.user_uuid,
+            operation=FilterOperationType.EQUAL,
         )
-
-        return SearchUserResponseDTO(users=users, total=total)
-
-    async def update_user(self, input_dto: UpdateUserCommandDTO) -> None:
-        update_data = input_dto.model_dump(exclude={"user_uuid"}, exclude_none=True)
-        if not update_data:
-            return
-
-        update_query: Update = (
-            update(UserEntity).where(UserEntity.user_uuid == input_dto.user_uuid).values(**update_data)
+        _query = self._apply_filter(
+            query=_query,
+            field=UserEntity.username,
+            operation=FilterOperationType.IS_NOT_NULL,
+            value="",
         )
+        _query = self._apply_filter(
+            query=_query,
+            field=UserEntity.user_type,
+            value=[
+                UserType.ADMIN,
+            ],
+            operation=FilterOperationType.IN_LIST,
+        )
+        _query = self._apply_filter(
+            query=_query,
+            field=UserEntity.is_deleted,
+            value=False,
+            operation=FilterOperationType.EQUAL,
+        )
+        result = await self._adapter.execute(statement=_query)
+        user = result.scalar()
 
-        result = await self._adapter.execute(statement=update_query)
-        if result.rowcount == 0:
+        if not user:
             raise NotFoundError(resource_type=UserEntity.__name__)
 
-    async def delete_user(self, input_dto: DeleteUserCommandDTO) -> None:
-        delete_query = delete(UserEntity).where(UserEntity.user_uuid == input_dto.user_uuid)
-
-        result = await self._adapter.execute(statement=delete_query)
-        if result.rowcount == 0:
-            raise NotFoundError(resource_type=UserEntity.__name__)
+        return GetUserResponseDTO.model_validate(obj=user)
 
     async def get_user_with_phone_number(
         self,

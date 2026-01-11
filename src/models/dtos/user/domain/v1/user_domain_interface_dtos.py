@@ -1,4 +1,4 @@
-from datetime import datetime, date
+from datetime import datetime
 from uuid import UUID
 
 from archipy.models.dtos.base_dtos import BaseDTO
@@ -16,11 +16,12 @@ class CreateUserRestInputDTOV1(BaseDTO):
     phone_number: StrictStr
     username: StrictStr | None = None
     hashed_password: StrictStr | None = None
+    email: StrictStr | None = None
     profile_picture_path: StrictStr | None = None
-    date_of_birth: date | None = None
-    user_type: UserType | None = None
-    user_status: UserStatusType | None = None
+    user_type: UserType = UserType.USER
+    user_status: UserStatusType = UserStatusType.ACTIVE
     gender_type: StrictStr | None = None
+    fcm_token: StrictStr | None = None
 
 
 class CreateUserInputDTOV1(CreateUserRestInputDTOV1):
@@ -52,10 +53,12 @@ class GetUserOutputDTOV1(BaseDTO):
     phone_number: StrictStr
     username: StrictStr | None = None
     hashed_password: StrictStr | None = None
+    email: StrictStr | None = None
     profile_picture_path: StrictStr | None = None
     user_type: UserType
     user_status: UserStatusType
     gender_type: StrictStr | None = None
+    fcm_token: StrictStr | None = None
 
 
 class UpdateUserRestInputDTOV1(BaseDTO):
@@ -64,10 +67,12 @@ class UpdateUserRestInputDTOV1(BaseDTO):
     phone_number: StrictStr | None = None
     username: StrictStr | None = None
     hashed_password: StrictStr | None = None
+    email: StrictStr | None = None
     profile_picture_path: StrictStr | None = None
     user_type: UserType | None = None
     user_status: UserStatusType | None = None
     gender_type: StrictStr | None = None
+    fcm_token: StrictStr | None = None
 
 
 class UpdateUserInputDTOV1(UpdateUserRestInputDTOV1):
@@ -103,10 +108,12 @@ class UserItemDTOV1(BaseDTO):
     phone_number: StrictStr
     username: StrictStr | None = None
     hashed_password: StrictStr | None = None
+    email: StrictStr | None = None
     profile_picture_path: StrictStr | None = None
     user_type: UserType
     user_status: UserStatusType
     gender_type: StrictStr | None = None
+    fcm_token: StrictStr | None = None
 
 
 class SearchUserOutputDTOV1(BaseDTO):

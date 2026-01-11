@@ -1,4 +1,4 @@
-from datetime import datetime, date
+from datetime import datetime
 from uuid import UUID
 
 from archipy.models.dtos.base_dtos import BaseDTO
@@ -15,10 +15,12 @@ class CreateUserCommandDTO(BaseDTO):
     phone_number: StrictStr
     username: StrictStr | None = None
     hashed_password: StrictStr | None = None
+    email: StrictStr | None = None
     profile_picture_path: StrictStr | None = None
-    user_type: UserType | None = None
-    user_status: UserStatusType | None = None
+    user_type: UserType = UserType.USER
+    user_status: UserStatusType = UserStatusType.ACTIVE
     gender_type: StrictStr | None = None
+    fcm_token: StrictStr | None = None
 
 
 class CreateUserResponseDTO(BaseDTO):
@@ -36,10 +38,12 @@ class GetUserResponseDTO(BaseDTO):
     phone_number: StrictStr
     username: StrictStr | None = None
     hashed_password: StrictStr | None = None
+    email: StrictStr | None = None
     profile_picture_path: StrictStr | None = None
     user_type: UserType
     user_status: UserStatusType
     gender_type: StrictStr | None = None
+    fcm_token: StrictStr | None = None
 
 
 class UpdateUserCommandDTO(BaseDTO):
@@ -49,10 +53,12 @@ class UpdateUserCommandDTO(BaseDTO):
     phone_number: StrictStr | None = None
     username: StrictStr | None = None
     hashed_password: StrictStr | None = None
+    email: StrictStr | None = None
     profile_picture_path: StrictStr | None = None
     user_type: UserType | None = None
     user_status: UserStatusType | None = None
     gender_type: StrictStr | None = None
+    fcm_token: StrictStr | None = None
 
 
 class DeleteUserCommandDTO(BaseDTO):
@@ -60,7 +66,7 @@ class DeleteUserCommandDTO(BaseDTO):
 
 
 class SearchUserQueryDTO(BaseDTO):
-    # Add search fields as needed
+    # TODO: Add search fields as needed
     pagination: PaginationDTO
     sort_info: SortDTO[str]
 

@@ -5,6 +5,7 @@ from uuid import UUID
 
 from src.configs.containers import ServiceContainer
 from src.logics.admin.admin_logic import AdminLogic
+from src.logics.user.user_logic import UserLogic
 from src.models.dtos.admin.domain.v1.admin_domain_interface_dtos import (
     CreateAppConfigInputDTOV1,
     CreateAppConfigOutputDTOV1,
@@ -18,11 +19,19 @@ from src.models.dtos.admin.domain.v1.admin_domain_interface_dtos import (
     UpdateAppConfigRestInputDTOV1,
     GetStartupConfigOutputDTOV1,
 )
+from src.models.dtos.user.domain.v1.user_domain_interface_dtos import (
+    CreateUserOutputDTOV1,
+    CreateUserRestInputDTOV1,
+    CreateUserInputDTOV1,
+    GetUserOutputDTOV1,
+    SearchUserOutputDTOV1,
+    SearchUserInputDTOV1,
+    DeleteUserInputDTOV1,
+)
 from src.models.types.api_router_type import ApiRouterType
 from src.utils.utils import Utils
 
 routerV1: APIRouter = APIRouter(tags=[ApiRouterType.ADMIN])
-
 
 AdminRouterV1: APIRouter = APIRouter(tags=[ApiRouterType.ADMIN])
 
@@ -80,3 +89,47 @@ async def get_startup_config(
     logic: AdminLogic = Depends(Provide[ServiceContainer.admin_logic]),
 ) -> GetStartupConfigOutputDTOV1:
     return await logic.get_startup_config(version)
+
+
+@routerV1.post(
+    path="/{user_uuid}/users",
+    response_model=CreateUserOutputDTOV1,
+)
+@inject
+async def create_user(
+    user_uuid: UUID,
+    input_dto: CreateUserRestInputDTOV1,
+    logic: UserLogic = Depends(Provide[ServiceContainer.user_logic]),
+) -> CreateUserOutputDTOV1:
+    input_dto = CreateUserInputDTOV1.create(user_uuid=user_uuid, input_dto=input_dto)
+    return await logic.create_user(input_dto=input_dto)
+
+
+@routerV1.get(
+    path="/{user_uuid}/users",
+    response_model=SearchUserOutputDTOV1,
+)
+@inject
+async def search_users(
+    user_uuid: UUID,
+    page: int = Query(default=1, ge=1, description="Page number"),
+    page_size: int = Query(default=10, ge=1, le=100, description="Number of items per page"),
+    logic: UserLogic = Depends(Provide[ServiceContainer.user_logic]),
+) -> SearchUserOutputDTOV1:
+    input_dto = SearchUserInputDTOV1.create(
+        page=page,
+        page_size=page_size,
+    )
+    return await logic.search_users(input_dto=input_dto)
+
+
+@routerV1.delete(
+    path="/users/{user_uuid}",
+)
+@inject
+async def delete_user(
+    user_uuid: UUID,
+    logic: UserLogic = Depends(Provide[ServiceContainer.user_logic]),
+) -> None:
+    input_dto = DeleteUserInputDTOV1(user_uuid=user_uuid)
+    await logic.delete_user(input_dto=input_dto)

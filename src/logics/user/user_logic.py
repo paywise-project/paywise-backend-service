@@ -59,15 +59,13 @@ class UserLogic:
 
     @async_postgres_sqlalchemy_atomic_decorator
     async def create_user(self, input_dto: CreateUserInputDTOV1) -> CreateUserOutputDTOV1:
-        command = CreateUserCommandDTO(
-            phone_number=input_dto.phone_number,
-        )
+        command = CreateUserCommandDTO.model_validate(input_dto)
         response: CreateUserResponseDTO = await self._repository.create_user(input_dto=command)
         return CreateUserOutputDTOV1.model_validate(obj=response)
 
     @async_postgres_sqlalchemy_atomic_decorator
     async def get_user(self, input_dto: GetUserInputDTOV1) -> GetUserOutputDTOV1:
-        query: GetUserQueryDTO = GetUserQueryDTO.model_validate(obj=input_dto)
+        query = GetUserQueryDTO.model_validate(obj=input_dto)
         response: GetUserResponseDTO = await self._repository.get_user(input_dto=query)
         return GetUserOutputDTOV1.model_validate(obj=response)
 
