@@ -42,6 +42,7 @@ class AuthLogic:
         user_logic: UserLogic = None,
         referral_logic: ReferralLogic = None,
     ) -> None:
+
         self._repository = repository
         self._user_logic: UserLogic = user_logic
         self._referral_logic: ReferralLogic = referral_logic
@@ -83,6 +84,7 @@ class AuthLogic:
 
     @async_postgres_sqlalchemy_atomic_decorator
     async def verify_totp(self, input_dto: VerifyTOTPInputDTOV1) -> VerifyTOTPOutputDTOV1:
+
         # await self._verify_totp(input_dto=input_dto)
 
         user_output_dto = await self._get_cashed_auth_user(
@@ -100,6 +102,7 @@ class AuthLogic:
         return VerifyTOTPOutputDTOV1(access_token=access_token, refresh_token=refresh_token)
 
     async def _verify_totp(self, input_dto: VerifyTOTPInputDTOV1) -> None:
+
         try:
             command = VerifyTOTPCommandDTO.model_validate(obj=input_dto)
             await self._repository.verify_totp(command=command)
@@ -117,6 +120,7 @@ class AuthLogic:
 
     @alru_cache(ttl=RuntimeConfig.global_config().AUTH_GET_USER_CACHE_EXPIRATION_SECONDS)
     async def _check_user_exist(self, user_uuid: UUID) -> None:
+
         try:
             isinstance(user_uuid, UUID)  # Basic type check
             await self._user_logic.get_user(input_dto=GetUserInputDTOV1(user_uuid=user_uuid))
@@ -129,6 +133,7 @@ class AuthLogic:
 
     @async_postgres_sqlalchemy_atomic_decorator
     async def refresh_token(self, input_dto: RefreshTokenInputDTOV1) -> RefreshTokenOutputDTOV1:
+
         payload: dict[str, any] = Utils.decode_token(token=input_dto.refresh_token, verify_type="refresh")
         user_uuid: UUID = Utils.extract_user_uuid(payload=payload)
         access_token: str = Utils.create_access_token(

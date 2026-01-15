@@ -106,3 +106,19 @@ class KYCLevelType(str, Enum):
     BASIC = "BASIC"
     ONE = "ONE"
     TWO = "TWO"
+
+
+class ExpenseStatusType(str, Enum):
+    PAID = "PAID"
+    UNPAID = "UNPAID"
+
+
+class ExpenseCategoryType(str, Enum):
+    RENT = "RENT"
+    UTILITIES = "UTILITIES"
+    LOAN = "LOAN"
+    FOOD = "FOOD"
+    TRANSPORT = "TRANSPORT"
+    INSURANCE = "INSURANCE"
+    SUBSCRIPTION = "SUBSCRIPTION"
+    OTHER = "OTHER"

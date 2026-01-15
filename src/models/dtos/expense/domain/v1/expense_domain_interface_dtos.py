@@ -11,12 +11,11 @@ from src.models.types.enums import *
 
 
 class CreateExpenseRestInputDTOV1(BaseDTO):
-    user_uuid: UUID
     title: StrictStr
     amount: int
-    category: StrictStr
+    category: ExpenseCategoryType
     day_of_month: int
-    status_type: StrictStr
+    status_type: ExpenseStatusType
     count: int | None = None
     is_active: bool
     notify_week_before: bool
@@ -52,9 +51,9 @@ class GetExpenseOutputDTOV1(BaseDTO):
     user_uuid: UUID
     title: StrictStr
     amount: int
-    category: StrictStr
+    category: ExpenseCategoryType
     day_of_month: int
-    status_type: StrictStr
+    status_type: ExpenseStatusType
     count: int | None = None
     is_active: bool
     notify_week_before: bool
@@ -67,9 +66,9 @@ class UpdateExpenseRestInputDTOV1(BaseDTO):
     user_uuid: UUID | None = None
     title: StrictStr | None = None
     amount: int | None = None
-    category: StrictStr | None = None
+    category: ExpenseCategoryType | None = None
     day_of_month: int | None = None
-    status_type: StrictStr | None = None
+    status_type: ExpenseStatusType | None = None
     count: int | None = None
     is_active: bool | None = None
     notify_week_before: bool | None = None
@@ -109,9 +108,9 @@ class ExpenseItemDTOV1(BaseDTO):
     user_uuid: UUID
     title: StrictStr
     amount: int
-    category: StrictStr
+    category: ExpenseCategoryType
     day_of_month: int
-    status_type: StrictStr
+    status_type: ExpenseStatusType
     count: int | None = None
     is_active: bool
     notify_week_before: bool

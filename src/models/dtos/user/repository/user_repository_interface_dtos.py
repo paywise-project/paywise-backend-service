@@ -19,7 +19,7 @@ class CreateUserCommandDTO(BaseDTO):
     profile_picture_path: StrictStr | None = None
     user_type: UserType = UserType.USER
     user_status: UserStatusType = UserStatusType.ACTIVE
-    gender_type: StrictStr | None = None
+    gender_type: GenderType | None = None
     fcm_token: StrictStr | None = None
 
 
@@ -42,7 +42,7 @@ class GetUserResponseDTO(BaseDTO):
     profile_picture_path: StrictStr | None = None
     user_type: UserType
     user_status: UserStatusType
-    gender_type: StrictStr | None = None
+    gender_type: GenderType | None = None
     fcm_token: StrictStr | None = None
 
 
@@ -57,7 +57,7 @@ class UpdateUserCommandDTO(BaseDTO):
     profile_picture_path: StrictStr | None = None
     user_type: UserType | None = None
     user_status: UserStatusType | None = None
-    gender_type: StrictStr | None = None
+    gender_type: GenderType | None = None
     fcm_token: StrictStr | None = None
 
 

@@ -11,7 +11,6 @@ from src.models.types.enums import *
 
 
 class CreateIncomeRestInputDTOV1(BaseDTO):
-    user_uuid: UUID
     title: StrictStr
     amount: int
     day_of_month: int
