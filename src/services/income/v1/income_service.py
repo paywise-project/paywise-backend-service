@@ -1,7 +1,9 @@
+from uuid import UUID
+
 from archipy.models.errors import NotFoundError
+from archipy.models.types import SortOrderType
 from dependency_injector.wiring import Provide, inject
 from fastapi import APIRouter, Depends, Query
-from uuid import UUID
 
 from src.configs.containers import ServiceContainer
 from src.logics.income.income_logic import IncomeLogic
@@ -59,13 +61,23 @@ async def get_income(
 @inject
 async def search_incomes(
     user_uuid: UUID,
+    is_active: bool | None = Query(default=None, description="Filter by activation"),
+    day_min: int | None = Query(default=None, description="Minimum day"),
+    day_max: int | None = Query(default=None, description="Maximum day"),
     page: int = Query(default=1, ge=1, description="Page number"),
     page_size: int = Query(default=10, ge=1, le=100, description="Number of items per page"),
+    sort_column: str = Query(default="created_at", description="Column to sort by"),
+    sort_order: SortOrderType = Query(default=SortOrderType.DESCENDING),
     logic: IncomeLogic = Depends(Provide[ServiceContainer.income_logic]),
 ) -> SearchIncomeOutputDTOV1:
     input_dto = SearchIncomeInputDTOV1.create(
+        user_uuid=user_uuid,
+        is_active=is_active,
+        days=(day_min, day_max) if day_min is not None and day_max is not None else None,
         page=page,
         page_size=page_size,
+        sort_column=sort_column,
+        sort_order=sort_order,
     )
     return await logic.search_incomes(input_dto=input_dto)
 

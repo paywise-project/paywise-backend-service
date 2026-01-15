@@ -1,13 +1,11 @@
+from typing import Tuple
+from uuid import UUID
+
 from archipy.models.dtos.base_dtos import BaseDTO
 from archipy.models.dtos.pagination_dto import PaginationDTO
 from archipy.models.dtos.sort_dto import SortDTO
 from archipy.models.types.sort_order_type import SortOrderType
-from datetime import datetime, date, time
-from decimal import Decimal
 from pydantic import StrictStr
-from uuid import UUID
-
-from src.models.types.enums import *
 
 
 class CreateIncomeRestInputDTOV1(BaseDTO):
@@ -15,7 +13,7 @@ class CreateIncomeRestInputDTOV1(BaseDTO):
     amount: int
     day_of_month: int
     count: int | None = None
-    is_active: bool
+    is_active: bool = True
     notes: StrictStr | None = None
 
 
@@ -71,13 +69,18 @@ class DeleteIncomeInputDTOV1(BaseDTO):
 
 
 class SearchIncomeInputDTOV1(BaseDTO):
-    # TODO: Add search fields as needed
+    user_uuid: UUID
+    is_active: bool | None = None
+    days: Tuple[int, int] | None = (None,)
     pagination: PaginationDTO
-    sort_info: SortDTO[str]  # Replace with appropriate sort enum
+    sort_info: SortDTO[str]
 
     @classmethod
     def create(
         cls,
+        user_uuid: UUID,
+        is_active: bool | None = None,
+        days: Tuple[int, int] | None = None,
         page: int = 1,
         page_size: int = 10,
         sort_column: str = "created_at",
@@ -85,7 +88,13 @@ class SearchIncomeInputDTOV1(BaseDTO):
     ):
         pagination = PaginationDTO(page=page, page_size=page_size)
         sort_info = SortDTO[str](column=sort_column, order=sort_order)
-        return cls(pagination=pagination, sort_info=sort_info)
+        return cls(
+            user_uuid=user_uuid,
+            is_active=is_active,
+            days=days,
+            pagination=pagination,
+            sort_info=sort_info,
+        )
 
 
 class IncomeItemDTOV1(BaseDTO):
