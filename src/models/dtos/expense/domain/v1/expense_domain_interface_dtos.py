@@ -1,11 +1,11 @@
+from typing import Tuple
+from uuid import UUID
+
 from archipy.models.dtos.base_dtos import BaseDTO
 from archipy.models.dtos.pagination_dto import PaginationDTO
 from archipy.models.dtos.sort_dto import SortDTO
 from archipy.models.types.sort_order_type import SortOrderType
-from datetime import datetime, date, time
-from decimal import Decimal
 from pydantic import StrictStr
-from uuid import UUID
 
 from src.models.types.enums import *
 
@@ -17,10 +17,10 @@ class CreateExpenseRestInputDTOV1(BaseDTO):
     day_of_month: int
     status_type: ExpenseStatusType
     count: int | None = None
-    is_active: bool
-    notify_week_before: bool
-    notify_day_before: bool
-    notify_on_day: bool
+    is_active: bool = True
+    notify_week_before: bool = False
+    notify_day_before: bool = False
+    notify_on_day: bool = False
     notes: StrictStr | None = None
 
 
@@ -86,13 +86,22 @@ class DeleteExpenseInputDTOV1(BaseDTO):
 
 
 class SearchExpenseInputDTOV1(BaseDTO):
-    # TODO: Add search fields as needed
+    user_uuid: UUID
+    categories: list[ExpenseCategoryType] | None = None
+    status_type: ExpenseStatusType | None = None
+    is_active: bool | None = None
+    days: Tuple[int, int] | None = (None,)
     pagination: PaginationDTO
-    sort_info: SortDTO[str]  # Replace with appropriate sort enum
+    sort_info: SortDTO[str]
 
     @classmethod
     def create(
         cls,
+        user_uuid: UUID,
+        categories: list[ExpenseCategoryType] | None = None,
+        status_type: ExpenseStatusType | None = None,
+        is_active: bool | None = None,
+        days: Tuple[int, int] | None = None,
         page: int = 1,
         page_size: int = 10,
         sort_column: str = "created_at",
@@ -100,7 +109,15 @@ class SearchExpenseInputDTOV1(BaseDTO):
     ):
         pagination = PaginationDTO(page=page, page_size=page_size)
         sort_info = SortDTO[str](column=sort_column, order=sort_order)
-        return cls(pagination=pagination, sort_info=sort_info)
+        return cls(
+            user_uuid=user_uuid,
+            categories=categories,
+            status_type=status_type,
+            is_active=is_active,
+            days=days,
+            pagination=pagination,
+            sort_info=sort_info,
+        )
 
 
 class ExpenseItemDTOV1(BaseDTO):

@@ -2,8 +2,7 @@ from archipy.adapters.base.sqlalchemy.adapters import SQLAlchemyFilterMixin
 from archipy.adapters.postgres.sqlalchemy.adapters import AsyncPostgresSQLAlchemyAdapter
 from archipy.models.errors import NotFoundError
 from archipy.models.types.base_types import FilterOperationType
-from sqlalchemy import delete, select, update, func, or_
-from sqlalchemy.orm import selectinload
+from sqlalchemy import select, update
 from sqlalchemy.sql.expression import Select, Update
 
 from src.models.dtos.expense.repository.expense_repository_interface_dtos import (
@@ -53,6 +52,45 @@ class ExpensePostgresAdapter(SQLAlchemyFilterMixin):
                 field=ExpenseEntity.user_uuid,
                 value=input_dto.user_uuid,
                 operation=FilterOperationType.EQUAL,
+            )
+
+        if input_dto.categories:
+            query = self._apply_filter(
+                query=query,
+                field=ExpenseEntity.category,
+                value=input_dto.categories,
+                operation=FilterOperationType.IN_LIST,
+            )
+
+        if input_dto.status_type:
+            query = self._apply_filter(
+                query=query,
+                field=ExpenseEntity.status_type,
+                value=input_dto.status_type,
+                operation=FilterOperationType.EQUAL,
+            )
+
+        if input_dto.is_active:
+            query = self._apply_filter(
+                query=query,
+                field=ExpenseEntity.is_active,
+                value=input_dto.is_active,
+                operation=FilterOperationType.EQUAL,
+            )
+
+        if input_dto.days:
+            day_min, day_max = input_dto.days
+            query = self._apply_filter(
+                query=query,
+                field=ExpenseEntity.day_of_month,
+                value=day_min,
+                operation=FilterOperationType.GREATER_THAN_OR_EQUAL,
+            )
+            query = self._apply_filter(
+                query=query,
+                field=ExpenseEntity.day_of_month,
+                value=day_max,
+                operation=FilterOperationType.LESS_THAN_OR_EQUAL,
             )
 
         entities, total = await self._adapter.execute_search_query(

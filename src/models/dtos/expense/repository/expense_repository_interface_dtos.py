@@ -1,10 +1,10 @@
+from typing import Tuple
+from uuid import UUID
+
 from archipy.models.dtos.base_dtos import BaseDTO
 from archipy.models.dtos.pagination_dto import PaginationDTO
 from archipy.models.dtos.sort_dto import SortDTO
-from datetime import datetime, date, time
-from decimal import Decimal
 from pydantic import StrictStr
-from uuid import UUID
 
 from src.models.types.enums import *
 
@@ -69,7 +69,11 @@ class DeleteExpenseCommandDTO(BaseDTO):
 
 
 class SearchExpenseQueryDTO(BaseDTO):
-    # TODO: Add search fields as needed
+    user_uuid: UUID
+    categories: list[ExpenseCategoryType] | None = None
+    status_type: ExpenseStatusType | None = None
+    is_active: bool | None = None
+    days: Tuple[int, int] | None = None
     pagination: PaginationDTO
     sort_info: SortDTO[str]
 
