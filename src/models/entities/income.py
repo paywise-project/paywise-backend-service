@@ -29,4 +29,4 @@ class IncomeEntity(UpdatableDeletableEntity):
 
     notes: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
 
-    user = relationship("User", back_populates="incomes")
+    user = relationship("UserEntity", back_populates="incomes")

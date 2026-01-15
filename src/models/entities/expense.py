@@ -31,5 +31,5 @@ class ExpenseEntity(UpdatableDeletableEntity):
 
     notes: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
 
-    user = relationship("User", back_populates="expenses")
-    notifications = relationship("Notification", back_populates="expense")
+    user = relationship("UserEntity", back_populates="expenses")
+    notifications = relationship("NotificationEntity", back_populates="expense")

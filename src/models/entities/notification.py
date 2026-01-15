@@ -31,5 +31,5 @@ class NotificationEntity(UpdatableDeletableEntity):
 
     sent_at: Mapped[datetime] = mapped_column(DateTime, server_default=func.now(), nullable=False)
 
-    user = relationship("User", back_populates="notifications")
-    expense = relationship("Expense", back_populates="notifications")
+    user = relationship("UserEntity", back_populates="notifications")
+    expense = relationship("ExpenseEntity", back_populates="notifications")
