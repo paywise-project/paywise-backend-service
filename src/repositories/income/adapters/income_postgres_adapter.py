@@ -4,6 +4,7 @@ from archipy.models.errors import NotFoundError
 from archipy.models.types.base_types import FilterOperationType
 from sqlalchemy import select, update
 from sqlalchemy.sql.expression import Select, Update
+from sqlalchemy import func
 
 from src.models.dtos.income.repository.income_repository_interface_dtos import (
     CreateIncomeCommandDTO,
@@ -14,6 +15,8 @@ from src.models.dtos.income.repository.income_repository_interface_dtos import (
     DeleteIncomeCommandDTO,
     SearchIncomeQueryDTO,
     SearchIncomeResponseDTO,
+    GetTotalIncomeQueryDTO,
+    GetTotalIncomeResponseDTO,
 )
 from src.models.entities import IncomeEntity
 
@@ -117,3 +120,42 @@ class IncomePostgresAdapter(SQLAlchemyFilterMixin):
         result = await self._adapter.execute(statement=delete_query)
         if result.rowcount == 0:
             raise NotFoundError(resource_type=IncomeEntity.__name__)
+
+    async def get_total_income(self, input_dto: GetTotalIncomeQueryDTO) -> GetTotalIncomeResponseDTO:
+        query = select(func.coalesce(func.sum(IncomeEntity.amount), 0)).where(IncomeEntity.is_deleted.is_(False))
+
+        if input_dto.user_uuid:
+            query = self._apply_filter(
+                query=query,
+                field=IncomeEntity.user_uuid,
+                value=input_dto.user_uuid,
+                operation=FilterOperationType.EQUAL,
+            )
+
+        if input_dto.is_active is not None:
+            query = self._apply_filter(
+                query=query,
+                field=IncomeEntity.is_active,
+                value=input_dto.is_active,
+                operation=FilterOperationType.EQUAL,
+            )
+
+        if input_dto.days:
+            day_min, day_max = input_dto.days
+            query = self._apply_filter(
+                query=query,
+                field=IncomeEntity.day_of_month,
+                value=day_min,
+                operation=FilterOperationType.GREATER_THAN_OR_EQUAL,
+            )
+            query = self._apply_filter(
+                query=query,
+                field=IncomeEntity.day_of_month,
+                value=day_max,
+                operation=FilterOperationType.LESS_THAN_OR_EQUAL,
+            )
+
+        result = await self._adapter.execute(statement=query)
+        total_amount = result.scalar_one()
+
+        return GetTotalIncomeResponseDTO(total_income_amount=total_amount)

@@ -81,3 +81,15 @@ class SearchExpenseQueryDTO(BaseDTO):
 class SearchExpenseResponseDTO(BaseDTO):
     expenses: list[GetExpenseResponseDTO]
     total: int
+
+
+class GetTotalExpenseQueryDTO(BaseDTO):
+    user_uuid: UUID
+    categories: list[ExpenseCategoryType] | None = None
+    status_type: ExpenseStatusType | None = None
+    is_active: bool | None = None
+    days: Tuple[int, int] | None = None
+
+
+class GetTotalExpenseResponseDTO(BaseDTO):
+    total_expense_amount: int

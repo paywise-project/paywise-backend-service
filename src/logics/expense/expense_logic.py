@@ -10,6 +10,8 @@ from src.models.dtos.expense.domain.v1.expense_domain_interface_dtos import (
     DeleteExpenseInputDTOV1,
     SearchExpenseInputDTOV1,
     SearchExpenseOutputDTOV1,
+    GetTotalExpenseInputDTOV1,
+    GetTotalExpenseOutputDTOV1,
 )
 from src.models.dtos.expense.repository.expense_repository_interface_dtos import (
     CreateExpenseCommandDTO,
@@ -20,6 +22,8 @@ from src.models.dtos.expense.repository.expense_repository_interface_dtos import
     DeleteExpenseCommandDTO,
     SearchExpenseQueryDTO,
     SearchExpenseResponseDTO,
+    GetTotalExpenseQueryDTO,
+    GetTotalExpenseResponseDTO,
 )
 from src.repositories.expense.expense_repository import ExpenseRepository
 
@@ -58,3 +62,9 @@ class ExpenseLogic:
     async def delete_expense(self, input_dto: DeleteExpenseInputDTOV1) -> None:
         command = DeleteExpenseCommandDTO.model_validate(obj=input_dto)
         await self._repository.delete_expense(input_dto=command)
+
+    @async_postgres_sqlalchemy_atomic_decorator
+    async def get_total_expense(self, input_dto: GetTotalExpenseInputDTOV1) -> GetTotalExpenseOutputDTOV1:
+        query = GetTotalExpenseQueryDTO.model_validate(obj=input_dto)
+        response: GetTotalExpenseResponseDTO = await self._repository.get_total_expense(input_dto=query)
+        return GetTotalExpenseOutputDTOV1.model_validate(obj=response)

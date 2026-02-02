@@ -10,6 +10,7 @@ class ApiRouterType(Enum):
     EXPENSE = "📉 EXPENSE"
     INCOME = "📈 INCOME"
     NOTIFICATION = "🔔 NOTIFICATION"
+    BALANCE = "🤹 BALANCE"
 
     # ADMINs
     ADMIN_AUTH = "⚖ ADMIN AUTH"

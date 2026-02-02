@@ -7,6 +7,8 @@ from src.models.dtos.income.repository.income_repository_interface_dtos import (
     DeleteIncomeCommandDTO,
     SearchIncomeQueryDTO,
     SearchIncomeResponseDTO,
+    GetTotalIncomeQueryDTO,
+    GetTotalIncomeResponseDTO,
 )
 from src.repositories.income.adapters.income_postgres_adapter import IncomePostgresAdapter
 
@@ -29,3 +31,6 @@ class IncomeRepository:
 
     async def delete_income(self, input_dto: DeleteIncomeCommandDTO) -> None:
         await self._postgres_adapter.delete_income(input_dto=input_dto)
+
+    async def get_total_income(self, input_dto: GetTotalIncomeQueryDTO) -> GetTotalIncomeResponseDTO:
+        return await self._postgres_adapter.get_total_income(input_dto=input_dto)

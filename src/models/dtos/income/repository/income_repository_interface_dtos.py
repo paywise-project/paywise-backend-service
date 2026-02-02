@@ -62,3 +62,13 @@ class SearchIncomeQueryDTO(BaseDTO):
 class SearchIncomeResponseDTO(BaseDTO):
     incomes: list[GetIncomeResponseDTO]
     total: int
+
+
+class GetTotalIncomeQueryDTO(BaseDTO):
+    user_uuid: UUID
+    is_active: bool | None = None
+    days: Tuple[int, int] | None = None
+
+
+class GetTotalIncomeResponseDTO(BaseDTO):
+    total_income_amount: int

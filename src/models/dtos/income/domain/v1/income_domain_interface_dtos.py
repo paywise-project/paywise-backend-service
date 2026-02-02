@@ -71,7 +71,7 @@ class DeleteIncomeInputDTOV1(BaseDTO):
 class SearchIncomeInputDTOV1(BaseDTO):
     user_uuid: UUID
     is_active: bool | None = None
-    days: Tuple[int, int] | None = (None,)
+    days: Tuple[int, int] | None = None
     pagination: PaginationDTO
     sort_info: SortDTO[str]
 
@@ -111,3 +111,13 @@ class IncomeItemDTOV1(BaseDTO):
 class SearchIncomeOutputDTOV1(BaseDTO):
     incomes: list[IncomeItemDTOV1]
     total: int
+
+
+class GetTotalIncomeInputDTOV1(BaseDTO):
+    user_uuid: UUID
+    is_active: bool | None = None
+    days: Tuple[int, int] | None = None
+
+
+class GetTotalIncomeOutputDTOV1(BaseDTO):
+    total_income_amount: int

@@ -5,6 +5,7 @@ from dependency_injector import containers, providers
 from src.configs.runtime_config import RuntimeConfig
 from src.logics.admin.admin_logic import AdminLogic
 from src.logics.auth.auth_logic import AuthLogic
+from src.logics.balance.balance_logic import BalanceLogic
 from src.logics.expense.expense_logic import ExpenseLogic
 from src.logics.file.file_logic import FileLogic
 from src.logics.income.income_logic import IncomeLogic
@@ -165,5 +166,13 @@ class ServiceContainer(containers.DeclarativeContainer):
     notification_logic = providers.ThreadSafeSingleton(
         NotificationLogic,
         repository=_notification_repository,
+    )
+    # endregion
+
+    # region balance
+    balance_logic = providers.ThreadSafeSingleton(
+        BalanceLogic,
+        expense_logic=expense_logic,
+        income_logic=income_logic,
     )
     # endregion

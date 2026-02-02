@@ -18,6 +18,8 @@ from src.models.dtos.income.domain.v1.income_domain_interface_dtos import (
     SearchIncomeOutputDTOV1,
     UpdateIncomeInputDTOV1,
     UpdateIncomeRestInputDTOV1,
+    GetTotalIncomeInputDTOV1,
+    GetTotalIncomeOutputDTOV1,
 )
 from src.models.types.api_router_type import ApiRouterType
 from src.utils.utils import Utils
@@ -107,3 +109,23 @@ async def delete_income(
 ) -> None:
     input_dto = DeleteIncomeInputDTOV1(income_uuid=income_uuid)
     await logic.delete_income(input_dto=input_dto)
+
+
+@routerV1.get(
+    path="/{user_uuid}/total-income",
+    response_model=GetTotalIncomeOutputDTOV1,
+)
+@inject
+async def get_total_income(
+    user_uuid: UUID,
+    is_active: bool | None = Query(default=None, description="Filter by activation"),
+    day_min: int | None = Query(default=None, description="Minimum day"),
+    day_max: int | None = Query(default=None, description="Maximum day"),
+    logic: IncomeLogic = Depends(Provide[ServiceContainer.income_logic]),
+) -> GetTotalIncomeOutputDTOV1:
+    input_dto = GetTotalIncomeInputDTOV1(
+        user_uuid=user_uuid,
+        is_active=is_active,
+        days=(day_min, day_max) if day_min is not None and day_max is not None else None,
+    )
+    return await logic.get_total_income(input_dto=input_dto)

@@ -18,6 +18,8 @@ from src.models.dtos.expense.domain.v1.expense_domain_interface_dtos import (
     SearchExpenseOutputDTOV1,
     UpdateExpenseInputDTOV1,
     UpdateExpenseRestInputDTOV1,
+    GetTotalExpenseOutputDTOV1,
+    GetTotalExpenseInputDTOV1,
 )
 from src.models.types.api_router_type import ApiRouterType
 from src.models.types.enums import ExpenseCategoryType, ExpenseStatusType
@@ -112,3 +114,27 @@ async def delete_expense(
 ) -> None:
     input_dto = DeleteExpenseInputDTOV1(expense_uuid=expense_uuid)
     await logic.delete_expense(input_dto=input_dto)
+
+
+@routerV1.get(
+    path="/{user_uuid}/total-expense",
+    response_model=GetTotalExpenseOutputDTOV1,
+)
+@inject
+async def get_total_expense(
+    user_uuid: UUID,
+    categories: list[ExpenseCategoryType] | None = Query(default=None, description="Filter by Categories"),
+    status_type: ExpenseStatusType | None = Query(default=None, description="Filter by status type"),
+    is_active: bool | None = Query(default=None, description="Filter by activation"),
+    day_min: int | None = Query(default=None, description="Minimum day"),
+    day_max: int | None = Query(default=None, description="Maximum day"),
+    logic: ExpenseLogic = Depends(Provide[ServiceContainer.expense_logic]),
+) -> GetTotalExpenseOutputDTOV1:
+    input_dto = GetTotalExpenseInputDTOV1(
+        user_uuid=user_uuid,
+        categories=categories,
+        status_type=status_type,
+        is_active=is_active,
+        days=(day_min, day_max) if day_min is not None and day_max is not None else None,
+    )
+    return await logic.get_total_expense(input_dto=input_dto)

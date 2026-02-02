@@ -7,6 +7,8 @@ from src.models.dtos.expense.repository.expense_repository_interface_dtos import
     DeleteExpenseCommandDTO,
     SearchExpenseQueryDTO,
     SearchExpenseResponseDTO,
+    GetTotalExpenseResponseDTO,
+    GetTotalExpenseQueryDTO,
 )
 from src.repositories.expense.adapters.expense_postgres_adapter import ExpensePostgresAdapter
 
@@ -29,3 +31,6 @@ class ExpenseRepository:
 
     async def delete_expense(self, input_dto: DeleteExpenseCommandDTO) -> None:
         await self._postgres_adapter.delete_expense(input_dto=input_dto)
+
+    async def get_total_expense(self, input_dto: GetTotalExpenseQueryDTO) -> GetTotalExpenseResponseDTO:
+        return await self._postgres_adapter.get_total_expense(input_dto=input_dto)

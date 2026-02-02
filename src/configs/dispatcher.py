@@ -7,6 +7,7 @@ from src.logics.auth.admin_authenticator_logic import AdminAuthenticator
 from src.logics.auth.authenticator_logic import Authenticator
 from src.services.admin.v1 import admin_service
 from src.services.auth.v1 import auth_service
+from src.services.balance.v1 import balance_service
 from src.services.expense.v1 import expense_service
 from src.services.file.v1 import file_service
 from src.services.income.v1 import income_service
@@ -28,26 +29,7 @@ def set_dispatch_routes(app: FastAPI) -> None:
     ]
 
     app.include_router(
-        router=admin_service.routerV1,
-        prefix="/api/v1/configs",
-        responses=common_private_response,
-    )
-    app.include_router(
         router=user_service.routerV1,
-        prefix="/api/v1/users",
-        dependencies=dependencies,
-        responses=common_private_response,
-    )
-
-    app.include_router(
-        router=referral_service.routerV1,
-        prefix="/api/v1/users",
-        dependencies=dependencies,
-        responses=common_private_response,
-    )
-
-    app.include_router(
-        router=file_service.routerV1,
         prefix="/api/v1/users",
         dependencies=dependencies,
         responses=common_private_response,
@@ -68,7 +50,34 @@ def set_dispatch_routes(app: FastAPI) -> None:
     )
 
     app.include_router(
+        router=balance_service.routerV1,
+        prefix="/api/v1/users",
+        dependencies=dependencies,
+        responses=common_private_response,
+    )
+
+    app.include_router(
         router=notification_service.routerV1,
+        prefix="/api/v1/users",
+        dependencies=dependencies,
+        responses=common_private_response,
+    )
+
+    app.include_router(
+        router=admin_service.routerV1,
+        prefix="/api/v1/configs",
+        responses=common_private_response,
+    )
+
+    app.include_router(
+        router=referral_service.routerV1,
+        prefix="/api/v1/users",
+        dependencies=dependencies,
+        responses=common_private_response,
+    )
+
+    app.include_router(
+        router=file_service.routerV1,
         prefix="/api/v1/users",
         dependencies=dependencies,
         responses=common_private_response,

@@ -90,7 +90,7 @@ class SearchExpenseInputDTOV1(BaseDTO):
     categories: list[ExpenseCategoryType] | None = None
     status_type: ExpenseStatusType | None = None
     is_active: bool | None = None
-    days: Tuple[int, int] | None = (None,)
+    days: Tuple[int, int] | None = None
     pagination: PaginationDTO
     sort_info: SortDTO[str]
 
@@ -139,3 +139,15 @@ class ExpenseItemDTOV1(BaseDTO):
 class SearchExpenseOutputDTOV1(BaseDTO):
     expenses: list[ExpenseItemDTOV1]
     total: int
+
+
+class GetTotalExpenseInputDTOV1(BaseDTO):
+    user_uuid: UUID
+    categories: list[ExpenseCategoryType] | None = None
+    status_type: ExpenseStatusType | None = None
+    is_active: bool | None = None
+    days: Tuple[int, int] | None = None
+
+
+class GetTotalExpenseOutputDTOV1(BaseDTO):
+    total_expense_amount: int

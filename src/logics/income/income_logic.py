@@ -10,6 +10,8 @@ from src.models.dtos.income.domain.v1.income_domain_interface_dtos import (
     DeleteIncomeInputDTOV1,
     SearchIncomeInputDTOV1,
     SearchIncomeOutputDTOV1,
+    GetTotalIncomeInputDTOV1,
+    GetTotalIncomeOutputDTOV1,
 )
 from src.models.dtos.income.repository.income_repository_interface_dtos import (
     CreateIncomeCommandDTO,
@@ -20,6 +22,8 @@ from src.models.dtos.income.repository.income_repository_interface_dtos import (
     DeleteIncomeCommandDTO,
     SearchIncomeQueryDTO,
     SearchIncomeResponseDTO,
+    GetTotalIncomeResponseDTO,
+    GetTotalIncomeQueryDTO,
 )
 from src.repositories.income.income_repository import IncomeRepository
 
@@ -58,3 +62,9 @@ class IncomeLogic:
     async def delete_income(self, input_dto: DeleteIncomeInputDTOV1) -> None:
         command = DeleteIncomeCommandDTO.model_validate(obj=input_dto)
         await self._repository.delete_income(input_dto=command)
+
+    @async_postgres_sqlalchemy_atomic_decorator
+    async def get_total_income(self, input_dto: GetTotalIncomeInputDTOV1) -> GetTotalIncomeOutputDTOV1:
+        query = GetTotalIncomeQueryDTO.model_validate(obj=input_dto)
+        response: GetTotalIncomeResponseDTO = await self._repository.get_total_income(input_dto=query)
+        return GetTotalIncomeOutputDTOV1.model_validate(obj=response)
