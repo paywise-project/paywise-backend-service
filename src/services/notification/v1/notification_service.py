@@ -1,3 +1,6 @@
+from datetime import datetime
+
+from archipy.models.types import SortOrderType
 from archipy.models.errors import NotFoundError
 from dependency_injector.wiring import Provide, inject
 from fastapi import APIRouter, Depends, Query
@@ -59,13 +62,29 @@ async def get_notification(
 @inject
 async def search_notifications(
     user_uuid: UUID,
+    notification_types: list[str] | None = Query(default=None, description="Filter by notification types"),
+    status_types: list[str] | None = Query(default=None, description="Filter by status types"),
+    is_read: bool | None = Query(default=None, description="Filter by read status"),
+    sent_at_min: datetime | None = Query(default=None, description="Minimum sent time"),
+    sent_at_max: datetime | None = Query(default=None, description="Maximum sent time"),
+    expense_uuid: UUID | None = Query(default=None, description="Filter by expense"),
     page: int = Query(default=1, ge=1, description="Page number"),
     page_size: int = Query(default=10, ge=1, le=100, description="Number of items per page"),
+    sort_column: str = Query(default="created_at", description="Column to sort by"),
+    sort_order: SortOrderType = Query(default=SortOrderType.DESCENDING),
     logic: NotificationLogic = Depends(Provide[ServiceContainer.notification_logic]),
 ) -> SearchNotificationOutputDTOV1:
     input_dto = SearchNotificationInputDTOV1.create(
+        user_uuid=user_uuid,
+        notification_types=notification_types,
+        status_types=status_types,
+        is_read=is_read,
+        sent_at=(sent_at_min, sent_at_max) if sent_at_min is not None and sent_at_max is not None else None,
+        expense_uuid=expense_uuid,
         page=page,
         page_size=page_size,
+        sort_column=sort_column,
+        sort_order=sort_order,
     )
     return await logic.search_notifications(input_dto=input_dto)
 

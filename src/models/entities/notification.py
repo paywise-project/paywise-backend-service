@@ -4,12 +4,12 @@ Notification related entities
 
 import uuid
 from datetime import datetime
+from typing import Optional
 
 from archipy.models.entities import UpdatableDeletableEntity
-from sqlalchemy import Column, ForeignKey, DateTime, Text
+from sqlalchemy import Column, ForeignKey, DateTime, Text, Boolean
 from sqlalchemy.dialects.postgresql import UUID, VARCHAR
 from sqlalchemy.orm import Mapped, mapped_column, relationship, Synonym
-from sqlalchemy.sql import func
 
 
 class NotificationEntity(UpdatableDeletableEntity):
@@ -27,9 +27,11 @@ class NotificationEntity(UpdatableDeletableEntity):
 
     title: Mapped[str] = mapped_column(VARCHAR(200), nullable=False)
     message: Mapped[str] = mapped_column(Text, nullable=False)
-    notification_type: Mapped[str] = mapped_column(VARCHAR(20), nullable=False)
+    notification_type: Mapped[str] = mapped_column(VARCHAR(30), nullable=False)
 
-    sent_at: Mapped[datetime] = mapped_column(DateTime, server_default=func.now(), nullable=False)
+    sent_at: Mapped[Optional[datetime]] = mapped_column(DateTime, nullable=True)
+    status: Mapped[str] = mapped_column(VARCHAR(20), nullable=False, default="PENDING")
+    is_read: Mapped[bool] = mapped_column(Boolean, nullable=False, default=False)
 
     user = relationship("UserEntity", back_populates="notifications")
     expense = relationship("ExpenseEntity", back_populates="notifications")

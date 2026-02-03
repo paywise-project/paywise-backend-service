@@ -88,12 +88,16 @@ class SubscriptionStatusType(str, Enum):
     PENDING = "PENDING"
 
 
+class NotificationStatusType(str, Enum):
+    PENDING = "PENDING"
+    SENT = "SENT"
+    FAILED = "FAILED"
+
+
 class NotificationType(str, Enum):
-    DANGER_ALERT = "DANGER_ALERT"
-    SHELTER_REQUEST = "SHELTER_REQUEST"
-    TIMELINE_UPDATE = "TIMELINE_UPDATE"
-    SYSTEM = "SYSTEM"
-    SUBSCRIPTION = "SUBSCRIPTION"
+    PAYMENT_DUE_WEEK = "PAYMENT_DUE_WEEK"
+    PAYMENT_DUE_DAY_BEFORE = "PAYMENT_DUE_DAY_BEFORE"
+    PAYMENT_DUE_TODAY = "PAYMENT_DUE_TODAY"
 
 
 class UpdateStatusType(str, Enum):

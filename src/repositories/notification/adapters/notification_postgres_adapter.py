@@ -55,6 +55,53 @@ class NotificationPostgresAdapter(SQLAlchemyFilterMixin):
                 operation=FilterOperationType.EQUAL,
             )
 
+        if input_dto.notification_types:
+            query = self._apply_filter(
+                query=query,
+                field=NotificationEntity.notification_type,
+                value=input_dto.notification_types,
+                operation=FilterOperationType.IN_LIST,
+            )
+
+        if input_dto.status_types:
+            query = self._apply_filter(
+                query=query,
+                field=NotificationEntity.status,
+                value=input_dto.status_types,
+                operation=FilterOperationType.IN_LIST,
+            )
+
+        if input_dto.is_read is not None:
+            query = self._apply_filter(
+                query=query,
+                field=NotificationEntity.is_read,
+                value=input_dto.is_read,
+                operation=FilterOperationType.EQUAL,
+            )
+
+        if input_dto.sent_at:
+            sent_at_min, sent_at_max = input_dto.sent_at
+            query = self._apply_filter(
+                query=query,
+                field=NotificationEntity.sent_at,
+                value=sent_at_min,
+                operation=FilterOperationType.GREATER_THAN_OR_EQUAL,
+            )
+            query = self._apply_filter(
+                query=query,
+                field=NotificationEntity.sent_at,
+                value=sent_at_max,
+                operation=FilterOperationType.LESS_THAN_OR_EQUAL,
+            )
+
+        if input_dto.expense_uuid:
+            query = self._apply_filter(
+                query=query,
+                field=NotificationEntity.expense_uuid,
+                value=input_dto.expense_uuid,
+                operation=FilterOperationType.EQUAL,
+            )
+
         entities, total = await self._adapter.execute_search_query(
             query=query,
             entity=NotificationEntity,

@@ -1,10 +1,11 @@
+from datetime import datetime
+from typing import Tuple
+from uuid import UUID
+
 from archipy.models.dtos.base_dtos import BaseDTO
 from archipy.models.dtos.pagination_dto import PaginationDTO
 from archipy.models.dtos.sort_dto import SortDTO
-from datetime import datetime, date, time
-from decimal import Decimal
 from pydantic import StrictStr
-from uuid import UUID
 
 from src.models.types.enums import *
 
@@ -14,8 +15,10 @@ class CreateNotificationCommandDTO(BaseDTO):
     expense_uuid: UUID
     title: StrictStr
     message: StrictStr
-    notification_type: StrictStr
-    sent_at: datetime
+    notification_type: NotificationType
+    sent_at: datetime | None = None
+    status: NotificationStatusType
+    is_read: bool
 
 
 class CreateNotificationResponseDTO(BaseDTO):
@@ -32,8 +35,10 @@ class GetNotificationResponseDTO(BaseDTO):
     expense_uuid: UUID
     title: StrictStr
     message: StrictStr
-    notification_type: StrictStr
-    sent_at: datetime
+    notification_type: NotificationType
+    sent_at: datetime | None = None
+    status: NotificationStatusType
+    is_read: bool
 
 
 class UpdateNotificationCommandDTO(BaseDTO):
@@ -42,8 +47,10 @@ class UpdateNotificationCommandDTO(BaseDTO):
     expense_uuid: UUID | None = None
     title: StrictStr | None = None
     message: StrictStr | None = None
-    notification_type: StrictStr | None = None
+    notification_type: NotificationType | None = None
     sent_at: datetime | None = None
+    status: NotificationStatusType | None = None
+    is_read: bool | None = None
 
 
 class DeleteNotificationCommandDTO(BaseDTO):
@@ -51,7 +58,12 @@ class DeleteNotificationCommandDTO(BaseDTO):
 
 
 class SearchNotificationQueryDTO(BaseDTO):
-    # TODO: Add search fields as needed
+    user_uuid: UUID
+    notification_types: list[str] | None = None
+    status_types: list[str] | None = None
+    is_read: bool | None = None
+    sent_at: Tuple[datetime, datetime] | None = None
+    expense_uuid: UUID | None = None
     pagination: PaginationDTO
     sort_info: SortDTO[str]
 
