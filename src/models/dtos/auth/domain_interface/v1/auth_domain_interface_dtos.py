@@ -1,4 +1,5 @@
 from datetime import datetime
+from uuid import UUID
 
 from archipy.models.dtos.base_dtos import BaseDTO
 from pydantic import StrictStr, field_validator
@@ -54,3 +55,16 @@ class LoginInputDTOV1(BaseDTO):
 class LoginOutputDTOV1(BaseDTO):
     access_token: StrictStr
     refresh_token: StrictStr
+
+
+class TelegramLoginInputDTOV1(BaseDTO):
+    telegram_id: int
+    first_name: StrictStr | None = None
+    last_name: StrictStr | None = None
+    telegram_username: StrictStr | None = None
+
+
+class TelegramLoginOutputDTOV1(BaseDTO):
+    access_token: StrictStr
+    refresh_token: StrictStr
+    customer_uuid: UUID

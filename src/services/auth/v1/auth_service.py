@@ -16,6 +16,8 @@ from src.models.dtos.auth.domain_interface.v1.auth_domain_interface_dtos import 
     VerifyTOTPOutputDTOV1,
     LoginOutputDTOV1,
     LoginInputDTOV1,
+    TelegramLoginOutputDTOV1,
+    TelegramLoginInputDTOV1,
 )
 from src.models.exceptions.auth import AuthInvalidTokenError, AuthUserNotFoundError
 from src.models.types.api_router_type import ApiRouterType
@@ -113,3 +115,15 @@ async def refresh_token(input_data: RefreshTokenInputDTOV1) -> RefreshTokenOutpu
 
     access_token: str = Utils.create_access_token(user_uuid=user_uuid)
     return RefreshTokenOutputDTOV1(access_token=access_token)
+
+
+@routerV1.post(
+    path="/telegram-login",
+    response_model=TelegramLoginOutputDTOV1,
+)
+@inject
+async def telegram_login(
+    input_dto: TelegramLoginInputDTOV1,
+    logic: AuthLogic = Depends(Provide[ServiceContainer.auth_logic]),
+) -> TelegramLoginOutputDTOV1:
+    return await logic.telegram_login(input_dto=input_dto)

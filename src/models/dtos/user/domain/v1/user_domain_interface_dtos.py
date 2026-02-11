@@ -186,3 +186,18 @@ class AdminUpdateUserRestInputDTOV1(BaseDTO):
 
 class AdminUpdateUserInputDTOV1(AdminUpdateUserRestInputDTOV1):
     user_uuid: UUID
+
+
+class GetUserWithTelegramIdInputDTOV1(BaseDTO):
+    telegram_id: int
+
+
+class GetUserWithTelegramIdOutputDTOV1(BaseDTO):
+    user_uuid: UUID
+
+
+class CreateTelegramUserInputDTOV1(BaseDTO):
+    telegram_id: int
+    first_name: StrictStr | None = None
+    last_name: StrictStr | None = None
+    telegram_username: StrictStr | None = None

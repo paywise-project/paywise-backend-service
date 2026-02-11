@@ -24,6 +24,8 @@ from src.models.dtos.user.domain.v1.user_domain_interface_dtos import (
     SearchUserOutputDTOV1,
     UpdateUserInputDTOV1,
     UpdateUserInternalsInputDTOV1,
+    CreateTelegramUserInputDTOV1,
+    GetUserWithTelegramIdOutputDTOV1,
 )
 from src.models.dtos.user.repository.user_repository_interface_dtos import (
     AdminUpdateUserCommandDTO,
@@ -44,6 +46,8 @@ from src.models.dtos.user.repository.user_repository_interface_dtos import (
     SearchUserResponseDTO,
     UpdateUserCommandDTO,
     UpdateUserInternalsCommandDTO,
+    GetUserWithTelegramIdQueryDTO,
+    GetUserWithTelegramIdResponseDTO,
 )
 from src.repositories.user.user_repository import UserRepository
 
@@ -153,3 +157,22 @@ class UserLogic:
     async def admin_update_user(self, input_dto: AdminUpdateUserInputDTOV1) -> None:
         command = AdminUpdateUserCommandDTO.model_validate(obj=input_dto)
         await self._repository.admin_update_user(command=command)
+
+    @async_postgres_sqlalchemy_atomic_decorator
+    async def get_or_create_telegram_user(
+        self,
+        input_dto: CreateTelegramUserInputDTOV1,
+    ) -> GetUserWithTelegramIdOutputDTOV1:
+        try:
+            query = GetUserWithTelegramIdQueryDTO(telegram_id=input_dto.telegram_id)
+            response = await self._repository.get_user_with_telegram_id(input_dto=query)
+        except NotFoundError:
+            create_dto = CreateUserCommandDTO(
+                telegram_id=input_dto.telegram_id,
+                first_name=input_dto.first_name,
+                last_name=input_dto.last_name,
+                telegram_username=input_dto.telegram_username,
+            )
+            created = await self._repository.create_user(input_dto=create_dto)
+            response = GetUserWithTelegramIdResponseDTO(user_uuid=created.user_uuid)
+        return GetUserWithTelegramIdOutputDTOV1.model_validate(obj=response)

@@ -146,3 +146,20 @@ class GetBaseUserResponseDTO(BaseDTO):
     gender_type: GenderType | None = None
     phone_number: StrictStr
     user_type: UserType
+
+
+class GetUserWithTelegramIdQueryDTO(BaseDTO):
+    telegram_id: int
+
+
+class GetUserWithTelegramIdResponseDTO(BaseDTO):
+    user_uuid: UUID
+
+
+class CreateTelegramUserCommandDTO(BaseDTO):
+    telegram_id: int
+    first_name: StrictStr | None = None
+    last_name: StrictStr | None = None
+    telegram_username: StrictStr | None = None
+    user_type: UserType = UserType.USER
+    user_status: UserStatusType = UserStatusType.ACTIVE

@@ -17,6 +17,8 @@ from src.models.dtos.auth.domain_interface.v1.auth_domain_interface_dtos import 
     VerifyTOTPOutputDTOV1,
     LoginOutputDTOV1,
     LoginInputDTOV1,
+    TelegramLoginInputDTOV1,
+    TelegramLoginOutputDTOV1,
 )
 from src.models.dtos.auth.repository_interface.auth_repository_interface_dtos import (
     CreateTOTPCommandDTO,
@@ -29,6 +31,7 @@ from src.models.dtos.user.domain.v1.user_domain_interface_dtos import (
     SearchAuthUsersOutputDTOV1,
     GetAdminUserInputDTOV1,
     GetAdminUserOutputDTOV1,
+    CreateTelegramUserInputDTOV1,
 )
 from src.models.exceptions.auth import AuthPermissionDeniedError
 from src.repositories.auth.auth_repository import AuthRepository
@@ -155,3 +158,21 @@ class AuthLogic:
         access_token: str = Utils.create_access_token(user_uuid=user_output_dto.user_uuid)
         refresh_token: str = Utils.create_refresh_token(user_uuid=user_output_dto.user_uuid)
         return LoginOutputDTOV1(access_token=access_token, refresh_token=refresh_token)
+
+    @async_postgres_sqlalchemy_atomic_decorator
+    async def telegram_login(self, input_dto: TelegramLoginInputDTOV1) -> TelegramLoginOutputDTOV1:
+        user = await self._user_logic.get_or_create_telegram_user(
+            input_dto=CreateTelegramUserInputDTOV1(
+                telegram_id=input_dto.telegram_id,
+                first_name=input_dto.first_name,
+                last_name=input_dto.last_name,
+                telegram_username=input_dto.telegram_username,
+            ),
+        )
+        access_token = Utils.create_access_token(user_uuid=user.user_uuid)
+        refresh_token = Utils.create_refresh_token(user_uuid=user.user_uuid)
+        return TelegramLoginOutputDTOV1(
+            access_token=access_token,
+            refresh_token=refresh_token,
+            customer_uuid=user.user_uuid,
+        )

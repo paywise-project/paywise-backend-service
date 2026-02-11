@@ -25,6 +25,8 @@ from src.models.dtos.user.repository.user_repository_interface_dtos import (
     UpdateUserCommandDTO,
     UpdateUserInternalsCommandDTO,
     UpdateUserKYCTypeCommandDTO,
+    GetUserWithTelegramIdQueryDTO,
+    GetUserWithTelegramIdResponseDTO,
 )
 from src.models.entities import UserEntity
 from src.models.types.enums import UserType, UserStatusType
@@ -225,3 +227,14 @@ class UserPostgresAdapter(SQLAlchemyFilterMixin):
         result = await self._adapter.execute(statement=update_query)
         if result.rowcount == 0:
             raise NotFoundError(resource_type=UserEntity.__name__)
+
+    async def get_user_with_telegram_id(
+        self,
+        input_dto: GetUserWithTelegramIdQueryDTO,
+    ) -> GetUserWithTelegramIdResponseDTO:
+        select_query = select(UserEntity.user_uuid).where(UserEntity.telegram_id == input_dto.telegram_id)
+        result = await self._adapter.execute(statement=select_query)
+        user = result.mappings().first()
+        if not user:
+            raise NotFoundError(resource_type=UserEntity.__name__)
+        return GetUserWithTelegramIdResponseDTO.model_validate(obj=user)

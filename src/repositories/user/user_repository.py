@@ -17,6 +17,8 @@ from src.models.dtos.user.repository.user_repository_interface_dtos import (
     SearchUserResponseDTO,
     UpdateUserCommandDTO,
     UpdateUserInternalsCommandDTO,
+    GetUserWithTelegramIdQueryDTO,
+    GetUserWithTelegramIdResponseDTO,
 )
 from src.repositories.user.adapters.user_postgres_adapter import UserPostgresAdapter
 
@@ -63,3 +65,9 @@ class UserRepository:
 
     async def admin_update_user(self, command: AdminUpdateUserCommandDTO) -> None:
         return await self._postgres_adapter.admin_update_user(command)
+
+    async def get_user_with_telegram_id(
+        self,
+        input_dto: GetUserWithTelegramIdQueryDTO,
+    ) -> GetUserWithTelegramIdResponseDTO:
+        return await self._postgres_adapter.get_user_with_telegram_id(input_dto=input_dto)

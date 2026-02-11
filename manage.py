@@ -1,11 +1,9 @@
 import logging
-import time
-import uvicorn
 
+import uvicorn
 from archipy.helpers.utils.app_utils import AppUtils
-from fastapi import FastAPI, APIRouter
-from starlette.middleware.base import BaseHTTPMiddleware
-from starlette.requests import Request
+from fastapi import FastAPI
+from fastapi.middleware.cors import CORSMiddleware
 
 from src.configs.containers import ServiceContainer
 from src.configs.dispatcher import set_dispatch_routes, set_admin_dispatch_routes
@@ -23,6 +21,18 @@ container.wire(packages=["src.services"])
 
 app: FastAPI = AppUtils.create_fastapi_app()
 app.container = container
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=[
+        "https://paywise-api.dipper.ir",
+        "https://paywise.dipper.ir",
+        "http://localhost:5173",
+        "https://*.telegram.org",
+    ],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 set_dispatch_routes(app)
 set_admin_dispatch_routes(app)
 
