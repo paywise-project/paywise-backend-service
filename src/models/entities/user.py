@@ -2,7 +2,7 @@ import uuid
 from typing import Optional
 
 from archipy.models.entities import UpdatableDeletableEntity
-from sqlalchemy import Column
+from sqlalchemy import Column, BigInteger
 from sqlalchemy.dialects.postgresql import UUID, VARCHAR
 from sqlalchemy.orm import Mapped, mapped_column, relationship, Synonym
 
@@ -15,7 +15,9 @@ class UserEntity(UpdatableDeletableEntity):
 
     first_name: Mapped[str] = mapped_column(VARCHAR(100), nullable=True)
     last_name: Mapped[str] = mapped_column(VARCHAR(100), nullable=True)
-    phone_number: Mapped[str] = mapped_column(VARCHAR(15), nullable=False, unique=True)
+    phone_number: Mapped[Optional[str]] = mapped_column(VARCHAR(15), nullable=True, unique=True)
+    telegram_id: Mapped[Optional[int]] = mapped_column(BigInteger, nullable=True, unique=True, index=True)
+    telegram_username: Mapped[Optional[str]] = mapped_column(VARCHAR(50), nullable=True)
 
     username: Mapped[Optional[str]] = mapped_column(VARCHAR(50), nullable=True)
     hashed_password: Mapped[Optional[str]] = mapped_column(VARCHAR(255), nullable=True)

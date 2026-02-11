@@ -12,7 +12,9 @@ from src.models.types.enums import *
 class CreateUserCommandDTO(BaseDTO):
     first_name: StrictStr | None = None
     last_name: StrictStr | None = None
-    phone_number: StrictStr
+    phone_number: StrictStr | None = None
+    telegram_id: int | None = None
+    telegram_username: StrictStr | None = None
     username: StrictStr | None = None
     hashed_password: StrictStr | None = None
     email: StrictStr | None = None
@@ -35,7 +37,9 @@ class GetUserResponseDTO(BaseDTO):
     user_uuid: UUID
     first_name: StrictStr | None = None
     last_name: StrictStr | None = None
-    phone_number: StrictStr
+    phone_number: StrictStr | None = None
+    telegram_id: int | None = None
+    telegram_username: StrictStr | None = None
     username: StrictStr | None = None
     hashed_password: StrictStr | None = None
     email: StrictStr | None = None
@@ -51,6 +55,8 @@ class UpdateUserCommandDTO(BaseDTO):
     first_name: StrictStr | None = None
     last_name: StrictStr | None = None
     phone_number: StrictStr | None = None
+    telegram_id: int | None = None
+    telegram_username: StrictStr | None = None
     username: StrictStr | None = None
     hashed_password: StrictStr | None = None
     email: StrictStr | None = None
