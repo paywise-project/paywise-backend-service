@@ -14,7 +14,7 @@ ___
 ___
 #### Domains:
 
-- api: https://mpm13-api.fazelidev.ir
+- api: https://paywise-api.dipper.ir
 
 ___
 
