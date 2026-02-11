@@ -1,19 +1,13 @@
 name: 'Deploy to VPS'
-
 on:
   push:
     tags:
       - '*.*.*'
-
 jobs:
   deploy:
     runs-on: ubuntu-latest
     timeout-minutes: 15
-
     steps:
-      - name: Set version
-        run: echo "VERSION=${GITHUB_REF#refs/tags/}" >> $GITHUB_ENV
-
       - name: Deploy to VPS
         uses: appleboy/ssh-action@v1.0.3
         with:
@@ -21,17 +15,18 @@ jobs:
           username: ${{ secrets.VPS_USER }}
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           port: ${{ secrets.VPS_PORT }}
+          envs: GITHUB_REF_NAME
           script: |
             cd ~/paywise-backend-service
             cp variables.env /tmp/variables.env.backup
             git fetch --tags
-            git checkout ${{ env.VERSION }}
+            git checkout $GITHUB_REF_NAME
             git pull origin main
             cp /tmp/variables.env.backup variables.env
-            sudo docker build --no-cache -t paywise-backend:${{ env.VERSION }} .
-            sudo docker tag paywise-backend:${{ env.VERSION }} paywise-backend:latest
+            sudo docker build --no-cache -t paywise-backend:$GITHUB_REF_NAME .
+            sudo docker tag paywise-backend:$GITHUB_REF_NAME paywise-backend:latest
             sudo docker compose -f docker-compose.prod.yml down
             sudo docker compose -f docker-compose.prod.yml up -d
             sudo docker compose -f docker-compose.prod.yml exec -T paywise-backend poetry run alembic upgrade head
             sudo docker image prune -f
-            echo "Deployed version ${{ env.VERSION }} successfully"
+            echo "Deployed $GITHUB_REF_NAME successfully"
