@@ -21,3 +21,4 @@ venv
 README.md
 docs/
 tests/
+poetry.toml
