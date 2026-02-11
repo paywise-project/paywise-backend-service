@@ -23,9 +23,13 @@ jobs:
           port: ${{ secrets.VPS_PORT }}
           script: |
             cd ~/paywise-backend-service
+            # Backup variables.env
+            cp variables.env /tmp/variables.env.backup
             git fetch --tags
             git checkout ${{ env.VERSION }}
             git pull origin main
+            # Restore variables.env
+            cp /tmp/variables.env.backup variables.env
             sudo docker build -t paywise-backend:${{ env.VERSION }} .
             sudo docker tag paywise-backend:${{ env.VERSION }} paywise-backend:latest
             sudo docker compose -f docker-compose.prod.yml down
