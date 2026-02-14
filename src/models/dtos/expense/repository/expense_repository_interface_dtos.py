@@ -69,7 +69,7 @@ class DeleteExpenseCommandDTO(BaseDTO):
 
 
 class SearchExpenseQueryDTO(BaseDTO):
-    user_uuid: UUID
+    user_uuid: UUID | None = None
     categories: list[ExpenseCategoryType] | None = None
     status_type: ExpenseStatusType | None = None
     is_active: bool | None = None

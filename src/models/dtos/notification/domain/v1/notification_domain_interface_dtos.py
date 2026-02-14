@@ -127,3 +127,8 @@ class NotificationItemDTOV1(BaseDTO):
 class SearchNotificationOutputDTOV1(BaseDTO):
     notifications: list[NotificationItemDTOV1]
     total: int
+
+
+class UpdateNotificationStatusInputDTOV1(BaseDTO):
+    notification_uuid: UUID
+    status: NotificationStatusType

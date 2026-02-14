@@ -1,3 +1,5 @@
+from datetime import datetime
+
 from archipy.helpers.decorators.sqlalchemy_atomic import async_postgres_sqlalchemy_atomic_decorator
 from uuid import UUID
 
@@ -10,6 +12,7 @@ from src.models.dtos.notification.domain.v1.notification_domain_interface_dtos i
     DeleteNotificationInputDTOV1,
     SearchNotificationInputDTOV1,
     SearchNotificationOutputDTOV1,
+    UpdateNotificationStatusInputDTOV1,
 )
 from src.models.dtos.notification.repository.notification_repository_interface_dtos import (
     CreateNotificationCommandDTO,
@@ -21,6 +24,7 @@ from src.models.dtos.notification.repository.notification_repository_interface_d
     SearchNotificationQueryDTO,
     SearchNotificationResponseDTO,
 )
+from src.models.types.enums import NotificationStatusType
 from src.repositories.notification.notification_repository import NotificationRepository
 
 
@@ -58,3 +62,12 @@ class NotificationLogic:
     async def delete_notification(self, input_dto: DeleteNotificationInputDTOV1) -> None:
         command = DeleteNotificationCommandDTO.model_validate(obj=input_dto)
         await self._repository.delete_notification(input_dto=command)
+
+    @async_postgres_sqlalchemy_atomic_decorator
+    async def update_notification_status(self, input_dto: UpdateNotificationStatusInputDTOV1) -> None:
+        command = UpdateNotificationCommandDTO(
+            notification_uuid=input_dto.notification_uuid,
+            status=input_dto.status,
+            sent_at=datetime.now() if input_dto.status == NotificationStatusType.SENT else None,
+        )
+        await self._repository.update_notification(input_dto=command)

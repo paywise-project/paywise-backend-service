@@ -19,6 +19,7 @@ from src.models.dtos.notification.domain.v1.notification_domain_interface_dtos i
     SearchNotificationOutputDTOV1,
     UpdateNotificationInputDTOV1,
     UpdateNotificationRestInputDTOV1,
+    UpdateNotificationStatusInputDTOV1,
 )
 from src.models.types.api_router_type import ApiRouterType
 from src.utils.utils import Utils
@@ -114,3 +115,17 @@ async def delete_notification(
 ) -> None:
     input_dto = DeleteNotificationInputDTOV1(notification_uuid=notification_uuid)
     await logic.delete_notification(input_dto=input_dto)
+
+
+@routerV1.patch(
+    path="/{user_uuid}/notifications/{notification_uuid}/status",
+)
+@inject
+async def update_notification_status(
+    user_uuid: UUID,
+    notification_uuid: UUID,
+    input_dto: UpdateNotificationStatusInputDTOV1,
+    logic: NotificationLogic = Depends(Provide[ServiceContainer.notification_logic]),
+) -> None:
+    input_dto.notification_uuid = notification_uuid
+    await logic.update_notification_status(input_dto=input_dto)

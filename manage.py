@@ -1,5 +1,6 @@
 import logging
-
+import asyncio
+import typer
 import uvicorn
 from archipy.helpers.utils.app_utils import AppUtils
 from fastapi import FastAPI
@@ -14,7 +15,6 @@ logging.basicConfig(
     handlers=[logging.FileHandler("../siteLogs.log"), logging.StreamHandler()],
     format="{'time':'%(asctime)s', 'name': '%(name)s','level': '%(levelname)s', 'message': '%(message)s'}",
 )
-
 
 container: ServiceContainer = ServiceContainer()
 container.wire(packages=["src.services"])
@@ -36,8 +36,11 @@ app.add_middleware(
 set_dispatch_routes(app)
 set_admin_dispatch_routes(app)
 
+app_cli = typer.Typer()
 
-if __name__ == "__main__":
+
+@app_cli.command("server")
+def _server():
     uvicorn.run(
         app="manage:app",
         access_log=RuntimeConfig.global_config().FASTAPI.ACCESS_LOG,
@@ -59,3 +62,16 @@ if __name__ == "__main__":
         ws_ping_interval=RuntimeConfig.global_config().FASTAPI.WS_PING_INTERVAL,
         ws_ping_timeout=RuntimeConfig.global_config().FASTAPI.WS_PING_TIMEOUT,
     )
+
+
+@app_cli.command("scheduler")
+def _scheduler():
+    async def _async_wrapper():
+        scheduler = container.scheduler_service()
+        await scheduler.run()
+
+    asyncio.run(_async_wrapper())
+
+
+if __name__ == "__main__":
+    app_cli()

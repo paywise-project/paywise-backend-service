@@ -11,6 +11,7 @@ from src.logics.file.file_logic import FileLogic
 from src.logics.income.income_logic import IncomeLogic
 from src.logics.notification.notification_logic import NotificationLogic
 from src.logics.referral.referral_logic import ReferralLogic
+from src.logics.scheduler.scheduler_logic import SchedulerLogic
 from src.logics.storage.storage_logic import StorageLogic
 from src.logics.user.user_logic import UserLogic
 from src.repositories.admin.adapters.admin_postgres_adapter import AdminPostgresAdapter
@@ -31,6 +32,7 @@ from src.repositories.storage.adapters.system_storage_adapter import SystemStora
 from src.repositories.storage.storage_repository import StorageRepository
 from src.repositories.user.adapters.user_postgres_adapter import UserPostgresAdapter
 from src.repositories.user.user_repository import UserRepository
+from src.services.scheduler.notification_scheduler_service import NotificationSchedulerService
 
 
 class ServiceContainer(containers.DeclarativeContainer):
@@ -174,5 +176,19 @@ class ServiceContainer(containers.DeclarativeContainer):
         BalanceLogic,
         expense_logic=expense_logic,
         income_logic=income_logic,
+    )
+    # endregion
+
+    # region scheduler
+    scheduler_logic = providers.ThreadSafeSingleton(
+        SchedulerLogic,
+        expense_logic=expense_logic,
+        notification_logic=notification_logic,
+        user_logic=user_logic,
+    )
+
+    scheduler_service = providers.ThreadSafeSingleton(
+        NotificationSchedulerService,
+        scheduler_logic=scheduler_logic,
     )
     # endregion

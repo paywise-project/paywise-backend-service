@@ -86,7 +86,7 @@ class DeleteExpenseInputDTOV1(BaseDTO):
 
 
 class SearchExpenseInputDTOV1(BaseDTO):
-    user_uuid: UUID
+    user_uuid: UUID | None = None
     categories: list[ExpenseCategoryType] | None = None
     status_type: ExpenseStatusType | None = None
     is_active: bool | None = None
@@ -97,7 +97,7 @@ class SearchExpenseInputDTOV1(BaseDTO):
     @classmethod
     def create(
         cls,
-        user_uuid: UUID,
+        user_uuid: UUID | None = None,
         categories: list[ExpenseCategoryType] | None = None,
         status_type: ExpenseStatusType | None = None,
         is_active: bool | None = None,

@@ -12,6 +12,11 @@ class RuntimeConfig(BaseConfig):
     AUTH_VERIFY_TOTP_MINUTES_LIMIT: int = 1
     ADMIN_AUTH_LOGIN_CALLS_COUNT_LIMIT: int = 10
     ADMIN_AUTH_LOGIN_MINUTES_LIMIT: int = 1
+    # REDIS_URL: str = "redis://localhost:6379/0"
+    REDIS_URL: str = "redis://redis:6379/0"
+    SCHEDULER_TRIGGER_TYPE: str = "cron"
+    SCHEDULER_HOUR: int = 0
+    SCHEDULER_MINUTE: int = 5
 
 
 BaseConfig.set_global(RuntimeConfig())
