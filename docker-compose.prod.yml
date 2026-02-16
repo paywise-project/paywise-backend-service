@@ -1,5 +1,4 @@
 version: '3.8'
-
 services:
   paywise-backend:
     image: paywise-backend:latest
@@ -8,7 +7,7 @@ services:
       - variables.env
     environment:
       - PYTHONPATH=/app
-    command: uvicorn manage:app --host 0.0.0.0 --port 8000
+    command: python manage.py server
     ports:
       - "8000:8000"
     logging:
@@ -20,7 +19,6 @@ services:
     depends_on:
       - postgres
       - redis
-
   postgres:
     image: postgres:16-alpine
     container_name: paywise-postgres
@@ -36,7 +34,6 @@ services:
         max-size: "10m"
         max-file: "3"
     restart: unless-stopped
-
   redis:
     image: redis:7-alpine
     container_name: paywise-redis
@@ -48,6 +45,5 @@ services:
         max-size: "10m"
         max-file: "3"
     restart: unless-stopped
-
 volumes:
   postgres_data:
