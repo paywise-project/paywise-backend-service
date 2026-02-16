@@ -12,6 +12,7 @@ package-mode = false
 python = "^3.13"
 archipy = { extras = ["fastapi", "sqlalchemy", "postgres", "dependency-injection", "cache", "redis", "jwt"], version = ">=3.14.0,<4.0.0" }
 alembic = "^1.17.1"
+apscheduler = "^3.10.4"
 psycopg2-binary = "^2.9.11"
 
 [tool.poetry.group.dev.dependencies]
