@@ -26,7 +26,8 @@ app.add_middleware(
     allow_origins=[
         "https://paywise-api.dipper.ir",
         "https://paywise.dipper.ir",
-        "http://localhost:5173",
+        "http://localhost:3000",
+        "https://pwtest.mhossein.ir",
         "https://*.telegram.org",
     ],
     allow_credentials=True,
