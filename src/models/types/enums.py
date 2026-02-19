@@ -126,3 +126,12 @@ class ExpenseCategoryType(str, Enum):
     INSURANCE = "INSURANCE"
     SUBSCRIPTION = "SUBSCRIPTION"
     OTHER = "OTHER"
+
+
+class RecurrenceType(str, Enum):
+    NONE = "NONE"
+    DAILY = "DAILY"
+    WEEKLY = "WEEKLY"
+    MONTHLY = "MONTHLY"
+    YEARLY = "YEARLY"
+    CUSTOM = "CUSTOM"

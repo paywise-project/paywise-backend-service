@@ -1,3 +1,4 @@
+from datetime import datetime
 from typing import Tuple
 from uuid import UUID
 
@@ -14,9 +15,11 @@ class CreateExpenseRestInputDTOV1(BaseDTO):
     title: StrictStr
     amount: int
     category: ExpenseCategoryType
-    day_of_month: int
+    start_datetime: datetime
+    recurrence_type: RecurrenceType
+    interval_value: int | None = None
+    remaining_occurrences: int | None = None
     status_type: ExpenseStatusType
-    count: int | None = None
     is_active: bool = True
     notify_week_before: bool = False
     notify_day_before: bool = False
