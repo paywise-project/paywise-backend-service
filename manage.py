@@ -29,6 +29,7 @@ app.add_middleware(
         "http://localhost:3000",
         "https://pwtest.mhossein.ir",
         "https://*.telegram.org",
+        "https://pwtestt.mhossein.ir/",
     ],
     allow_credentials=True,
     allow_methods=["*"],
