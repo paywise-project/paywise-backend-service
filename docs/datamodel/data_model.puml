@@ -1,0 +1,71 @@
+@startuml data_model
+
+entity "users" {
+    * user_uuid : UUID <<PK>>
+    --
+    first_name : VARCHAR(100)
+    last_name : VARCHAR(100)
+    phone_number : VARCHAR(15)
+    telegram_id : BIGINT
+    telegram_username : VARCHAR(50)
+    username : VARCHAR(50)
+    hashed_password : VARCHAR(255)
+    email : VARCHAR(255)
+    profile_picture_path : VARCHAR(500)
+    user_type : VARCHAR(20)
+    user_status : VARCHAR(20)
+    gender_type : VARCHAR(30)
+    fcm_token : VARCHAR(500)
+}
+
+entity "payments" {
+    * payment_uuid : UUID <<PK>>
+    --
+    * user_uuid : UUID <<FK>>
+    * payment_type : VARCHAR(20)
+    * title : VARCHAR(200)
+    * amount : INT
+    * category_type : VARCHAR(20)
+    notes : TEXT
+    * is_active : BOOLEAN
+    * start_datetime : DATETIME
+    * recurrence_type : VARCHAR(20)
+    interval_days : INT
+    day_of_month_anchor : INT
+    total_occurrences : INT
+    * processed_occurrences : INT
+    * notify_week_before : BOOLEAN
+    * notify_day_before : BOOLEAN
+    * notify_on_day : BOOLEAN
+}
+
+entity "payment_occurrences" {
+    * payment_occurrence_uuid : UUID <<PK>>
+    --
+    * payment_uuid : UUID <<FK>>
+    * user_uuid : UUID <<FK>>
+    * due_datetime : DATETIME
+    status_type : VARCHAR(20)
+    paid_at : DATETIME
+}
+
+entity "notifications" {
+    * notification_uuid : UUID <<PK>>
+    --
+    * user_uuid : UUID <<FK>>
+    * payment_uuid : UUID <<FK>>
+    * title : VARCHAR(200)
+    * message : TEXT
+    * notification_type : VARCHAR(30)
+    sent_at : DATETIME
+    * status_type : VARCHAR(20)
+    * is_read : BOOLEAN
+}
+
+users ||--o{ payments : "has"
+users ||--o{ payment_occurrences : "has"
+users ||--o{ notifications : "has"
+payments ||--o{ payment_occurrences : "generates"
+payments ||--o{ notifications : "triggers"
+
+@enduml

@@ -12,12 +12,12 @@ from src.models.types.enums import *
 
 
 class CreateNotificationRestInputDTOV1(BaseDTO):
-    expense_uuid: UUID
+    payment_uuid: UUID
     title: StrictStr
     message: StrictStr
     notification_type: NotificationType
     sent_at: datetime | None = None
-    status: NotificationStatusType
+    status_type: NotificationStatusType
     is_read: bool
 
 
@@ -46,23 +46,23 @@ class GetNotificationInputDTOV1(BaseDTO):
 class GetNotificationOutputDTOV1(BaseDTO):
     notification_uuid: UUID
     user_uuid: UUID
-    expense_uuid: UUID
+    payment_uuid: UUID
     title: StrictStr
     message: StrictStr
     notification_type: NotificationType
     sent_at: datetime | None = None
-    status: NotificationStatusType
+    status_type: NotificationStatusType
     is_read: bool
 
 
 class UpdateNotificationRestInputDTOV1(BaseDTO):
     user_uuid: UUID | None = None
-    expense_uuid: UUID | None = None
+    payment_uuid: UUID | None = None
     title: StrictStr | None = None
     message: StrictStr | None = None
     notification_type: NotificationType | None = None
     sent_at: datetime | None = None
-    status: NotificationStatusType | None = None
+    status_type: NotificationStatusType | None = None
     is_read: bool | None = None
 
 
@@ -80,7 +80,7 @@ class SearchNotificationInputDTOV1(BaseDTO):
     status_types: list[str] | None = None
     is_read: bool | None = None
     sent_at: Tuple[datetime, datetime] | None = None
-    expense_uuid: UUID | None = None
+    payment_uuid: UUID | None = None
     pagination: PaginationDTO
     sort_info: SortDTO[str]
 
@@ -92,7 +92,7 @@ class SearchNotificationInputDTOV1(BaseDTO):
         status_types: list[str] | None = None,
         is_read: bool | None = None,
         sent_at: Tuple[datetime, datetime] | None = None,
-        expense_uuid: UUID | None = None,
+        payment_uuid: UUID | None = None,
         page: int = 1,
         page_size: int = 10,
         sort_column: str = "created_at",
@@ -106,7 +106,7 @@ class SearchNotificationInputDTOV1(BaseDTO):
             status_types=status_types,
             is_read=is_read,
             sent_at=sent_at,
-            expense_uuid=expense_uuid,
+            payment_uuid=payment_uuid,
             pagination=pagination,
             sort_info=sort_info,
         )
@@ -115,12 +115,12 @@ class SearchNotificationInputDTOV1(BaseDTO):
 class NotificationItemDTOV1(BaseDTO):
     notification_uuid: UUID
     user_uuid: UUID
-    expense_uuid: UUID
+    payment_uuid: UUID
     title: StrictStr
     message: StrictStr
     notification_type: NotificationType
     sent_at: datetime | None = None
-    status: NotificationStatusType
+    status_type: NotificationStatusType
     is_read: bool
 
 
@@ -131,4 +131,4 @@ class SearchNotificationOutputDTOV1(BaseDTO):
 
 class UpdateNotificationStatusInputDTOV1(BaseDTO):
     notification_uuid: UUID
-    status: NotificationStatusType
+    status_type: NotificationStatusType

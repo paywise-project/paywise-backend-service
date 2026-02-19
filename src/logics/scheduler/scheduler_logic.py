@@ -5,16 +5,15 @@ import jdatetime
 import redis
 
 from src.configs.runtime_config import RuntimeConfig
-from src.logics.expense.expense_logic import ExpenseLogic
 from src.logics.notification.notification_logic import NotificationLogic
+from src.logics.payment.payment_logic import PaymentLogic
 from src.logics.user.user_logic import UserLogic
-from src.models.dtos.expense.domain.v1.expense_domain_interface_dtos import SearchExpenseInputDTOV1
 from src.models.dtos.notification.domain.v1.notification_domain_interface_dtos import (
     CreateNotificationInputDTOV1,
     CreateNotificationRestInputDTOV1,
 )
 from src.models.dtos.user.domain.v1.user_domain_interface_dtos import GetUserInputDTOV1
-from src.models.types.enums import NotificationStatusType, NotificationType, ExpenseStatusType
+from src.models.types.enums import NotificationStatusType, NotificationType
 
 logger = logging.getLogger(__name__)
 
@@ -22,11 +21,11 @@ logger = logging.getLogger(__name__)
 class SchedulerLogic:
     def __init__(
         self,
-        expense_logic: ExpenseLogic,
+        payment_logic: PaymentLogic,
         notification_logic: NotificationLogic,
         user_logic: UserLogic,
     ) -> None:
-        self._expense_logic = expense_logic
+        self._payment_logic = payment_logic
         self._notification_logic = notification_logic
         self._redis = redis.from_url(RuntimeConfig.global_config().REDIS_URL)
         self._user_logic = user_logic

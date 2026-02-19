@@ -42,6 +42,6 @@ class UserEntity(UpdatableDeletableEntity):
     )
     created_files = relationship("FileEntity", foreign_keys="[FileEntity.created_by]")
     updated_files = relationship("FileEntity", foreign_keys="[FileEntity.updated_by]")
-    incomes = relationship("IncomeEntity", back_populates="user")
-    expenses = relationship("ExpenseEntity", back_populates="user")
+    payments = relationship("PaymentEntity", back_populates="user")
+    payment_occurrences = relationship("PaymentOccurrenceEntity", back_populates="user")
     notifications = relationship("NotificationEntity", back_populates="user")

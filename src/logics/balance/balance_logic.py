@@ -1,30 +1,22 @@
 from typing import Tuple
 from uuid import UUID
 
-from src.logics.expense.expense_logic import ExpenseLogic
-from src.logics.income.income_logic import IncomeLogic
+
 from archipy.helpers.decorators.sqlalchemy_atomic import async_postgres_sqlalchemy_atomic_decorator
 
+from src.logics.payment.payment_logic import PaymentLogic
 from src.models.dtos.balance.domain.v1.balance_domain_interface_dtos import GetBalanceOutputDTOV1
-from src.models.dtos.expense.domain.v1.expense_domain_interface_dtos import (
-    GetTotalExpenseOutputDTOV1,
-    GetTotalExpenseInputDTOV1,
-)
-from src.models.dtos.income.domain.v1.income_domain_interface_dtos import (
-    SearchIncomeInputDTOV1,
-    GetTotalIncomeInputDTOV1,
-)
+
+
 from src.utils.date_utils import DateUtils
 
 
 class BalanceLogic:
     def __init__(
         self,
-        expense_logic: ExpenseLogic,
-        income_logic: IncomeLogic,
+        payment_logic: PaymentLogic,
     ) -> None:
-        self.expense_logic = expense_logic
-        self.income_logic = income_logic
+        self.payment_logic = payment_logic
 
     @async_postgres_sqlalchemy_atomic_decorator
     async def get_balance(self, user_uuid: UUID) -> GetBalanceOutputDTOV1:
