@@ -23,8 +23,11 @@ from src.models.dtos.payment.repository.payment_repository_interface_dtos import
     DeletePaymentOccurrenceCommandDTO,
     SearchPaymentOccurrenceQueryDTO,
     SearchPaymentOccurrenceResponseDTO,
+    GetBalanceQueryDTO,
+    GetBalanceResponseDTO,
 )
 from src.models.entities import PaymentEntity, PaymentOccurrenceEntity
+from src.models.types.enums import PaymentType
 
 
 class PaymentPostgresAdapter(SQLAlchemyFilterMixin):
@@ -280,3 +283,50 @@ class PaymentPostgresAdapter(SQLAlchemyFilterMixin):
         result = await self._adapter.execute(statement=delete_query)
         if result.rowcount == 0:
             raise NotFoundError(resource_type=PaymentOccurrenceEntity.__name__)
+
+    async def get_balance(self, input_dto: GetBalanceQueryDTO) -> GetBalanceResponseDTO:
+        total_income_col = func.coalesce(
+            func.sum(PaymentEntity.amount).filter(PaymentEntity.payment_type == PaymentType.INCOME),
+            0,
+        ).label("total_income")
+
+        total_expense_col = func.coalesce(
+            func.sum(PaymentEntity.amount).filter(PaymentEntity.payment_type == PaymentType.EXPENSE),
+            0,
+        ).label("total_expense")
+
+        query = (
+            select(total_income_col, total_expense_col)
+            .select_from(PaymentOccurrenceEntity)
+            .join(PaymentEntity, PaymentEntity.payment_uuid == PaymentOccurrenceEntity.payment_uuid)
+            .where(
+                PaymentOccurrenceEntity.is_deleted.is_(False),
+                PaymentEntity.is_deleted.is_(False),
+                PaymentEntity.user_uuid == input_dto.user_uuid,
+            )
+        )
+
+        if input_dto.payment_type:
+            query = query.where(PaymentEntity.payment_type == input_dto.payment_type)
+
+        if input_dto.category_types:
+            query = query.where(PaymentEntity.category_type.in_(input_dto.category_types))
+
+        if input_dto.recurrence_types:
+            query = query.where(PaymentEntity.recurrence_type.in_(input_dto.recurrence_types))
+
+        if input_dto.is_active is not None:
+            query = query.where(PaymentEntity.is_active == input_dto.is_active)
+
+        if input_dto.status_type:
+            query = query.where(PaymentOccurrenceEntity.status_type == input_dto.status_type)
+
+        if input_dto.due_datetime:
+            due_min, due_max = input_dto.due_datetime
+            query = query.where(PaymentOccurrenceEntity.due_datetime >= due_min)
+            query = query.where(PaymentOccurrenceEntity.due_datetime <= due_max)
+
+        result = await self._adapter.execute(statement=query)
+        row = result.one()
+
+        return GetBalanceResponseDTO(total_income=row.total_income, total_expense=row.total_expense)

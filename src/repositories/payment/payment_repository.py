@@ -15,6 +15,8 @@ from src.models.dtos.payment.repository.payment_repository_interface_dtos import
     DeletePaymentOccurrenceCommandDTO,
     SearchPaymentOccurrenceQueryDTO,
     SearchPaymentOccurrenceResponseDTO,
+    GetBalanceResponseDTO,
+    GetBalanceQueryDTO,
 )
 from src.repositories.payment.adapters.payment_postgres_adapter import PaymentPostgresAdapter
 
@@ -58,3 +60,6 @@ class PaymentRepository:
 
     async def delete_payment_occurrence(self, input_dto: DeletePaymentOccurrenceCommandDTO) -> None:
         await self._postgres_adapter.delete_payment_occurrence(input_dto=input_dto)
+
+    async def get_balance(self, input_dto: GetBalanceQueryDTO) -> GetBalanceResponseDTO:
+        return await self._postgres_adapter.get_balance(input_dto=input_dto)

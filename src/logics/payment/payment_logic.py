@@ -5,6 +5,7 @@ from uuid import UUID
 
 import jdatetime
 
+from src.models.dtos.balance.domain.v1.balance_domain_interface_dtos import GetBalanceInputDTOV1, GetBalanceOutputDTOV1
 from src.models.dtos.payment.domain.v1.payment_domain_interface_dtos import (
     CreatePaymentInputDTOV1,
     CreatePaymentOutputDTOV1,
@@ -40,6 +41,8 @@ from src.models.dtos.payment.repository.payment_repository_interface_dtos import
     DeletePaymentOccurrenceCommandDTO,
     SearchPaymentOccurrenceQueryDTO,
     SearchPaymentOccurrenceResponseDTO,
+    GetBalanceQueryDTO,
+    GetBalanceResponseDTO,
 )
 from src.models.types.enums import *
 from src.repositories.payment.payment_repository import PaymentRepository
@@ -232,3 +235,13 @@ class PaymentLogic:
     async def delete_payment_occurrence(self, input_dto: DeletePaymentOccurrenceInputDTOV1) -> None:
         command = DeletePaymentOccurrenceCommandDTO.model_validate(obj=input_dto)
         await self._repository.delete_payment_occurrence(input_dto=command)
+
+    @async_postgres_sqlalchemy_atomic_decorator
+    async def get_balance(self, input_dto: GetBalanceInputDTOV1) -> GetBalanceOutputDTOV1:
+        query_dto = GetBalanceQueryDTO.model_validate(input_dto)
+        response: GetBalanceResponseDTO = await self._repository.get_balance(input_dto=query_dto)
+        return GetBalanceOutputDTOV1(
+            total_income=response.total_income,
+            total_expense=response.total_expense,
+            balance=response.total_income - response.total_expense,
+        )

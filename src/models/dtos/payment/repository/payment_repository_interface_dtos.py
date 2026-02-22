@@ -136,3 +136,18 @@ class SearchPaymentOccurrenceQueryDTO(BaseDTO):
 class SearchPaymentOccurrenceResponseDTO(BaseDTO):
     payment_occurrences: list[GetPaymentOccurrenceResponseDTO]
     total: int
+
+
+class GetBalanceQueryDTO(BaseDTO):
+    user_uuid: UUID
+    payment_type: PaymentType | None = None
+    category_types: list[PaymentCategoryType] | None = None
+    recurrence_types: list[PaymentRecurrenceType] | None = None
+    is_active: bool | None = None
+    status_type: PaymentOccurrenceStatusType | None = None
+    due_datetime: Tuple[datetime, datetime] | None = None
+
+
+class GetBalanceResponseDTO(BaseDTO):
+    total_income: int
+    total_expense: int
