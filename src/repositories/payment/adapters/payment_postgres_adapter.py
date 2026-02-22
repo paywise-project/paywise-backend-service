@@ -235,12 +235,17 @@ class PaymentPostgresAdapter(SQLAlchemyFilterMixin):
                 operation=FilterOperationType.LESS_THAN_OR_EQUAL,
             )
 
-        entities, total = await self._adapter.execute_search_query(
-            query=query,
-            entity=PaymentOccurrenceEntity,
-            sort_info=input_dto.sort_info,
-            pagination=input_dto.pagination,
-        )
+        if input_dto.pagination:
+            entities, total = await self._adapter.execute_search_query(
+                query=query,
+                entity=PaymentOccurrenceEntity,
+                sort_info=input_dto.sort_info,
+                pagination=input_dto.pagination,
+            )
+        else:
+            result = await self._adapter.execute(query)
+            entities = result.scalars().all()
+            total = len(entities)
 
         return SearchPaymentOccurrenceResponseDTO(payment_occurrences=entities, total=total)
 

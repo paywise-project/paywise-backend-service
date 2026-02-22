@@ -177,6 +177,18 @@ class PaymentLogic:
 
     @async_postgres_sqlalchemy_atomic_decorator
     async def delete_payment(self, input_dto: DeletePaymentInputDTOV1) -> None:
+        search_payment_occurrences_input_dto = SearchPaymentOccurrenceInputDTOV1(
+            payment_uuid=input_dto.payment_uuid,
+        )
+        payment_occurrences: SearchPaymentOccurrenceOutputDTOV1 = await self.search_payment_occurrences(
+            input_dto=search_payment_occurrences_input_dto,
+        )
+        for occurrence in payment_occurrences.payment_occurrences:
+            await self.delete_payment_occurrence(
+                input_dto=DeletePaymentOccurrenceInputDTOV1(
+                    payment_occurrence_uuid=occurrence.payment_occurrence_uuid,
+                ),
+            )
         command = DeletePaymentCommandDTO.model_validate(obj=input_dto)
         await self._repository.delete_payment(input_dto=command)
 

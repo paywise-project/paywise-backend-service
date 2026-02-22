@@ -93,14 +93,6 @@ class UpdatePaymentRestInputDTOV1(BaseDTO):
     notify_day_before: bool | None = None
     notify_on_day: bool | None = None
 
-    @model_validator(mode="after")
-    def validate_update(self):
-        if self.payment_type == PaymentType.INCOME and (
-            self.notify_week_before or self.notify_day_before or self.notify_on_day
-        ):
-            raise ValueError("INCOME payments cannot have notifications")
-        return self
-
 
 class UpdatePaymentInputDTOV1(UpdatePaymentRestInputDTOV1):
     payment_uuid: UUID
@@ -225,18 +217,18 @@ class DeletePaymentOccurrenceInputDTOV1(BaseDTO):
 
 
 class SearchPaymentOccurrenceInputDTOV1(BaseDTO):
-    user_uuid: UUID
+    user_uuid: UUID | None = None
     payment_uuid: UUID | None = None
     status_type: PaymentOccurrenceStatusType | None = None
     due_datetime: Tuple[datetime, datetime] | None = None
     paid_at: Tuple[datetime, datetime] | None = None
-    pagination: PaginationDTO
-    sort_info: SortDTO[str]
+    pagination: PaginationDTO | None = None
+    sort_info: SortDTO[str] | None = None
 
     @classmethod
     def create(
         cls,
-        user_uuid: UUID,
+        user_uuid: UUID | None = None,
         payment_uuid: UUID | None = None,
         status_type: PaymentOccurrenceStatusType | None = None,
         due_datetime: Tuple[datetime, datetime] | None = None,

@@ -34,7 +34,6 @@ class CreatePaymentResponseDTO(BaseDTO):
 
 class GetPaymentQueryDTO(BaseDTO):
     payment_uuid: UUID
-    user_uuid: UUID
 
 
 class GetPaymentResponseDTO(BaseDTO):
@@ -59,7 +58,6 @@ class GetPaymentResponseDTO(BaseDTO):
 
 class UpdatePaymentCommandDTO(BaseDTO):
     payment_uuid: UUID
-    user_uuid: UUID
     title: StrictStr | None = None
     category_type: PaymentCategoryType | None = None
     notes: StrictStr | None = None
@@ -71,7 +69,6 @@ class UpdatePaymentCommandDTO(BaseDTO):
 
 class DeletePaymentCommandDTO(BaseDTO):
     payment_uuid: UUID
-    user_uuid: UUID
 
 
 class SearchPaymentQueryDTO(BaseDTO):
@@ -124,17 +121,16 @@ class UpdatePaymentOccurrenceCommandDTO(BaseDTO):
 
 class DeletePaymentOccurrenceCommandDTO(BaseDTO):
     payment_occurrence_uuid: UUID
-    user_uuid: UUID
 
 
 class SearchPaymentOccurrenceQueryDTO(BaseDTO):
-    user_uuid: UUID
+    user_uuid: UUID | None = None
     payment_uuid: UUID | None = None
     status_type: PaymentOccurrenceStatusType | None = None
     due_datetime: Tuple[datetime, datetime] | None = None
     paid_at: Tuple[datetime, datetime] | None = None
-    pagination: PaginationDTO
-    sort_info: SortDTO[str]
+    pagination: PaginationDTO | None = None
+    sort_info: SortDTO[str] | None = None
 
 
 class SearchPaymentOccurrenceResponseDTO(BaseDTO):
