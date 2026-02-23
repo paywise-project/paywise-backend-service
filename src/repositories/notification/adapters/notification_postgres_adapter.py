@@ -66,7 +66,7 @@ class NotificationPostgresAdapter(SQLAlchemyFilterMixin):
         if input_dto.status_types:
             query = self._apply_filter(
                 query=query,
-                field=NotificationEntity.status,
+                field=NotificationEntity.status_type,
                 value=input_dto.status_types,
                 operation=FilterOperationType.IN_LIST,
             )
@@ -94,10 +94,10 @@ class NotificationPostgresAdapter(SQLAlchemyFilterMixin):
                 operation=FilterOperationType.LESS_THAN_OR_EQUAL,
             )
 
-        if input_dto.expense_uuid:
+        if input_dto.payment_uuid:
             query = self._apply_filter(
                 query=query,
-                field=NotificationEntity.expense_uuid,
+                field=NotificationEntity.payment_uuid,
                 value=input_dto.expense_uuid,
                 operation=FilterOperationType.EQUAL,
             )

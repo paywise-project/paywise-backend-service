@@ -17,7 +17,7 @@ class CreateNotificationCommandDTO(BaseDTO):
     message: StrictStr
     notification_type: NotificationType
     sent_at: datetime | None = None
-    status: NotificationStatusType
+    status_type: NotificationStatusType
     is_read: bool
 
 
@@ -37,7 +37,7 @@ class GetNotificationResponseDTO(BaseDTO):
     message: StrictStr
     notification_type: NotificationType
     sent_at: datetime | None = None
-    status: NotificationStatusType
+    status_type: NotificationStatusType
     is_read: bool
 
 
@@ -49,7 +49,7 @@ class UpdateNotificationCommandDTO(BaseDTO):
     message: StrictStr | None = None
     notification_type: NotificationType | None = None
     sent_at: datetime | None = None
-    status: NotificationStatusType | None = None
+    status_type: NotificationStatusType | None = None
     is_read: bool | None = None
 
 

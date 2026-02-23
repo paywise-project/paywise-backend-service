@@ -18,7 +18,7 @@ class CreateNotificationRestInputDTOV1(BaseDTO):
     notification_type: NotificationType
     sent_at: datetime | None = None
     status_type: NotificationStatusType
-    is_read: bool
+    is_read: bool = False
 
 
 class CreateNotificationInputDTOV1(CreateNotificationRestInputDTOV1):
@@ -129,6 +129,9 @@ class SearchNotificationOutputDTOV1(BaseDTO):
     total: int
 
 
-class UpdateNotificationStatusInputDTOV1(BaseDTO):
-    notification_uuid: UUID
+class UpdateNotificationStatusRestInputDTOV1(BaseDTO):
     status_type: NotificationStatusType
+
+
+class UpdateNotificationStatusInputDTOV1(UpdateNotificationStatusRestInputDTOV1):
+    notification_uuid: UUID

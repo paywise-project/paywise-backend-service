@@ -67,7 +67,7 @@ class NotificationLogic:
     async def update_notification_status(self, input_dto: UpdateNotificationStatusInputDTOV1) -> None:
         command = UpdateNotificationCommandDTO(
             notification_uuid=input_dto.notification_uuid,
-            status=input_dto.status,
-            sent_at=datetime.now() if input_dto.status == NotificationStatusType.SENT else None,
+            status_type=input_dto.status_type,
+            sent_at=datetime.now() if input_dto.status_type == NotificationStatusType.SENT else None,
         )
         await self._repository.update_notification(input_dto=command)
