@@ -151,3 +151,54 @@ class GetBalanceQueryDTO(BaseDTO):
 class GetBalanceResponseDTO(BaseDTO):
     total_income: int
     total_expense: int
+
+
+class GetCalendarQueryDTO(BaseDTO):
+    user_uuid: UUID
+    start_datetime: datetime
+    end_datetime: datetime
+    payment_type: PaymentType | None = None
+
+
+class CalendarItemDTO(BaseDTO):
+    due_datetime: datetime
+    payment_type: PaymentType
+    title: str
+    amount: int
+    status_type: PaymentOccurrenceStatusType | None
+
+
+class GetCalendarResponseDTO(BaseDTO):
+    items: list[CalendarItemDTO]
+
+
+class GetUpcomingPaymentQueryDTO(BaseDTO):
+    user_uuid: UUID
+    payment_type: PaymentType | None = None
+    category_types: list[PaymentCategoryType] | None = None
+
+
+class GetUpcomingPaymentResponseDTO(BaseDTO):
+    payment_occurrence_uuid: UUID
+    payment_uuid: UUID
+    payment_type: PaymentType
+    title: str
+    amount: int
+    category_type: PaymentCategoryType
+    day_of_month_anchor: int | None
+    due_datetime: datetime
+
+
+class GetPaymentOccurrencesForPaymentQueryDTO(BaseDTO):
+    payment_uuid: UUID
+    user_uuid: UUID
+    occurrence_count: int
+    status_type: PaymentOccurrenceStatusType | None = None
+
+
+class GetPaymentOccurrencesForPaymentResponseDTO(BaseDTO):
+    payment_occurrence_uuid: UUID
+    due_datetime: datetime
+    status_type: PaymentOccurrenceStatusType | None
+    paid_at: datetime | None
+    index: int

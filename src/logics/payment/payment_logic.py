@@ -1,4 +1,5 @@
 from archipy.helpers.decorators.sqlalchemy_atomic import async_postgres_sqlalchemy_atomic_decorator
+from archipy.models.errors import NotFoundError
 from uuid import UUID
 from datetime import datetime, timedelta
 from uuid import UUID
@@ -23,6 +24,14 @@ from src.models.dtos.payment.domain.v1.payment_domain_interface_dtos import (
     DeletePaymentOccurrenceInputDTOV1,
     SearchPaymentOccurrenceInputDTOV1,
     SearchPaymentOccurrenceOutputDTOV1,
+    GetCalendarInputDTOV1,
+    GetCalendarOutputDTOV1,
+    GetUpcomingPaymentInputDTOV1,
+    GetUpcomingPaymentOutputDTOV1,
+    GetPaymentsWithOccurrencesInputDTOV1,
+    GetPaymentsWithOccurrencesOutputDTOV1,
+    OccurrenceSummaryDTOV1,
+    PaymentWithOccurrencesDTOV1,
 )
 from src.models.dtos.payment.repository.payment_repository_interface_dtos import (
     CreatePaymentCommandDTO,
@@ -43,6 +52,11 @@ from src.models.dtos.payment.repository.payment_repository_interface_dtos import
     SearchPaymentOccurrenceResponseDTO,
     GetBalanceQueryDTO,
     GetBalanceResponseDTO,
+    GetCalendarQueryDTO,
+    GetCalendarResponseDTO,
+    GetUpcomingPaymentQueryDTO,
+    GetUpcomingPaymentResponseDTO,
+    GetPaymentOccurrencesForPaymentQueryDTO,
 )
 from src.models.types.enums import *
 from src.repositories.payment.payment_repository import PaymentRepository
@@ -244,4 +258,61 @@ class PaymentLogic:
             total_income=response.total_income,
             total_expense=response.total_expense,
             balance=response.total_income - response.total_expense,
+        )
+
+    @async_postgres_sqlalchemy_atomic_decorator
+    async def get_calendar(self, input_dto: GetCalendarInputDTOV1) -> GetCalendarOutputDTOV1:
+        query_dto = GetCalendarQueryDTO.model_validate(input_dto)
+        response: GetCalendarResponseDTO = await self._repository.get_calendar(input_dto=query_dto)
+        return GetCalendarOutputDTOV1.model_validate(response)
+
+    @async_postgres_sqlalchemy_atomic_decorator
+    async def get_upcoming_payment(self, input_dto: GetUpcomingPaymentInputDTOV1) -> GetUpcomingPaymentOutputDTOV1:
+        query_dto = GetUpcomingPaymentQueryDTO.model_validate(input_dto)
+        response: GetUpcomingPaymentResponseDTO = await self._repository.get_upcoming_payment(input_dto=query_dto)
+        if response is None:
+            raise NotFoundError
+        return GetUpcomingPaymentOutputDTOV1.model_validate(response)
+
+    @async_postgres_sqlalchemy_atomic_decorator
+    async def get_payments_with_occurrences(
+        self,
+        input_dto: GetPaymentsWithOccurrencesInputDTOV1,
+    ) -> GetPaymentsWithOccurrencesOutputDTOV1:
+        payments_response: SearchPaymentResponseDTO = await self._repository.search_payments(
+            input_dto=SearchPaymentQueryDTO.model_validate(input_dto),
+        )
+
+        payments_with_occurrences = []
+        for payment in payments_response.payments:
+            occurrences_response = await self._repository.get_payment_occurrences_for_payment(
+                input_dto=GetPaymentOccurrencesForPaymentQueryDTO(
+                    payment_uuid=payment.payment_uuid,
+                    user_uuid=input_dto.user_uuid,
+                    occurrence_count=input_dto.occurrence_count,
+                    status_type=input_dto.occurrence_status_type,
+                ),
+            )
+
+            occurrences = [
+                OccurrenceSummaryDTOV1(
+                    payment_occurrence_uuid=occ.payment_occurrence_uuid,
+                    due_datetime=occ.due_datetime,
+                    status_type=occ.status_type,
+                    paid_at=occ.paid_at,
+                    index=occ.index,
+                )
+                for occ in occurrences_response
+            ]
+
+            payments_with_occurrences.append(
+                PaymentWithOccurrencesDTOV1(
+                    **payment.model_dump(),
+                    occurrences=occurrences,
+                ),
+            )
+
+        return GetPaymentsWithOccurrencesOutputDTOV1(
+            payments=payments_with_occurrences,
+            total=payments_response.total,
         )

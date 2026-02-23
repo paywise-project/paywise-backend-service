@@ -1,3 +1,5 @@
+from datetime import datetime
+
 from archipy.adapters.base.sqlalchemy.adapters import SQLAlchemyFilterMixin
 from archipy.adapters.postgres.sqlalchemy.adapters import AsyncPostgresSQLAlchemyAdapter
 from archipy.models.errors import NotFoundError
@@ -25,9 +27,16 @@ from src.models.dtos.payment.repository.payment_repository_interface_dtos import
     SearchPaymentOccurrenceResponseDTO,
     GetBalanceQueryDTO,
     GetBalanceResponseDTO,
+    GetCalendarQueryDTO,
+    GetCalendarResponseDTO,
+    CalendarItemDTO,
+    GetUpcomingPaymentQueryDTO,
+    GetUpcomingPaymentResponseDTO,
+    GetPaymentOccurrencesForPaymentQueryDTO,
+    GetPaymentOccurrencesForPaymentResponseDTO,
 )
 from src.models.entities import PaymentEntity, PaymentOccurrenceEntity
-from src.models.types.enums import PaymentType
+from src.models.types.enums import PaymentType, PaymentOccurrenceStatusType
 
 
 class PaymentPostgresAdapter(SQLAlchemyFilterMixin):
@@ -330,3 +339,129 @@ class PaymentPostgresAdapter(SQLAlchemyFilterMixin):
         row = result.one()
 
         return GetBalanceResponseDTO(total_income=row.total_income, total_expense=row.total_expense)
+
+    async def get_calendar(self, input_dto: GetCalendarQueryDTO) -> GetCalendarResponseDTO:
+        query = (
+            select(
+                PaymentOccurrenceEntity.due_datetime,
+                PaymentEntity.payment_type,
+                PaymentEntity.title,
+                PaymentEntity.amount,
+                PaymentOccurrenceEntity.status_type,
+            )
+            .select_from(PaymentOccurrenceEntity)
+            .join(PaymentEntity, PaymentEntity.payment_uuid == PaymentOccurrenceEntity.payment_uuid)
+            .where(
+                PaymentOccurrenceEntity.is_deleted.is_(False),
+                PaymentEntity.is_deleted.is_(False),
+                PaymentEntity.user_uuid == input_dto.user_uuid,
+                PaymentOccurrenceEntity.due_datetime >= input_dto.start_datetime,
+                PaymentOccurrenceEntity.due_datetime <= input_dto.end_datetime,
+            )
+            .order_by(PaymentOccurrenceEntity.due_datetime.asc())
+        )
+
+        if input_dto.payment_type:
+            query = query.where(PaymentEntity.payment_type == input_dto.payment_type)
+
+        result = await self._adapter.execute(statement=query)
+        rows = result.mappings().all()
+
+        return GetCalendarResponseDTO(items=[CalendarItemDTO(**row) for row in rows])
+
+    async def get_upcoming_payment(self, input_dto: GetUpcomingPaymentQueryDTO) -> GetUpcomingPaymentResponseDTO | None:
+        now = datetime.now()
+
+        where_conditions = [
+            PaymentOccurrenceEntity.is_deleted.is_(False),
+            PaymentEntity.is_deleted.is_(False),
+            PaymentEntity.is_active.is_(True),
+            PaymentEntity.user_uuid == input_dto.user_uuid,
+            PaymentOccurrenceEntity.due_datetime >= now,
+        ]
+
+        if input_dto.payment_type == PaymentType.INCOME:
+            where_conditions.append(PaymentEntity.payment_type == PaymentType.INCOME)
+        elif input_dto.payment_type == PaymentType.EXPENSE:
+            where_conditions.append(PaymentEntity.payment_type == PaymentType.EXPENSE)
+            where_conditions.append(PaymentOccurrenceEntity.status_type == PaymentOccurrenceStatusType.UNPAID)
+        else:
+            where_conditions.append(
+                or_(
+                    PaymentOccurrenceEntity.status_type == PaymentOccurrenceStatusType.UNPAID,
+                    PaymentOccurrenceEntity.status_type.is_(None),
+                ),
+            )
+
+        query = (
+            select(
+                PaymentOccurrenceEntity.payment_occurrence_uuid,
+                PaymentEntity.payment_uuid,
+                PaymentEntity.payment_type,
+                PaymentEntity.title,
+                PaymentEntity.amount,
+                PaymentEntity.category_type,
+                PaymentEntity.day_of_month_anchor,
+                PaymentOccurrenceEntity.due_datetime,
+            )
+            .select_from(PaymentOccurrenceEntity)
+            .join(PaymentEntity, PaymentEntity.payment_uuid == PaymentOccurrenceEntity.payment_uuid)
+            .where(*where_conditions)
+            .order_by(PaymentOccurrenceEntity.due_datetime.asc())
+            .limit(1)
+        )
+
+        if input_dto.category_types:
+            query = query.where(PaymentEntity.category_type.in_(input_dto.category_types))
+
+        result = await self._adapter.execute(statement=query)
+        row = result.mappings().one_or_none()
+
+        if row is None:
+            return None
+
+        return GetUpcomingPaymentResponseDTO(**row)
+
+    async def get_payment_occurrences_for_payment(
+        self,
+        input_dto: GetPaymentOccurrencesForPaymentQueryDTO,
+    ) -> list[GetPaymentOccurrencesForPaymentResponseDTO]:
+        now = datetime.now()
+
+        row_number = (
+            func.row_number()
+            .over(
+                partition_by=PaymentOccurrenceEntity.payment_uuid,
+                order_by=PaymentOccurrenceEntity.due_datetime.asc(),
+            )
+            .label("index")
+        )
+
+        subquery = (
+            select(
+                PaymentOccurrenceEntity.payment_occurrence_uuid,
+                PaymentOccurrenceEntity.due_datetime,
+                PaymentOccurrenceEntity.status_type,
+                PaymentOccurrenceEntity.paid_at,
+                row_number,
+            ).where(
+                PaymentOccurrenceEntity.is_deleted.is_(False),
+                PaymentOccurrenceEntity.payment_uuid == input_dto.payment_uuid,
+                PaymentOccurrenceEntity.user_uuid == input_dto.user_uuid,
+            )
+        ).subquery()
+
+        query = (
+            select(subquery)
+            .where(subquery.c.due_datetime >= now)
+            .order_by(subquery.c.due_datetime.asc())
+            .limit(input_dto.occurrence_count)
+        )
+
+        if input_dto.status_type is not None:
+            query = query.where(subquery.c.status_type == input_dto.status_type)
+
+        result = await self._adapter.execute(statement=query)
+        rows = result.mappings().all()
+
+        return [GetPaymentOccurrencesForPaymentResponseDTO(**row) for row in rows]

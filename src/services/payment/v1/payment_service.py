@@ -8,28 +8,7 @@ from uuid import UUID
 
 from src.configs.containers import ServiceContainer
 from src.logics.payment.payment_logic import PaymentLogic
-from src.models.dtos.payment.domain.v1.payment_domain_interface_dtos import (
-    CreatePaymentInputDTOV1,
-    CreatePaymentOccurrenceInputDTOV1,
-    CreatePaymentOccurrenceOutputDTOV1,
-    CreatePaymentOccurrenceRestInputDTOV1,
-    CreatePaymentOutputDTOV1,
-    CreatePaymentRestInputDTOV1,
-    DeletePaymentInputDTOV1,
-    DeletePaymentOccurrenceInputDTOV1,
-    GetPaymentInputDTOV1,
-    GetPaymentOccurrenceInputDTOV1,
-    GetPaymentOccurrenceOutputDTOV1,
-    GetPaymentOutputDTOV1,
-    SearchPaymentInputDTOV1,
-    SearchPaymentOccurrenceInputDTOV1,
-    SearchPaymentOccurrenceOutputDTOV1,
-    SearchPaymentOutputDTOV1,
-    UpdatePaymentInputDTOV1,
-    UpdatePaymentOccurrenceInputDTOV1,
-    UpdatePaymentOccurrenceRestInputDTOV1,
-    UpdatePaymentRestInputDTOV1,
-)
+from src.models.dtos.payment.domain.v1.payment_domain_interface_dtos import *
 from src.models.types.api_router_type import ApiRouterType
 from src.models.types.enums import *
 from src.utils.utils import Utils
@@ -218,3 +197,78 @@ async def delete_payment_occurrence(
 ) -> None:
     input_dto = DeletePaymentOccurrenceInputDTOV1(payment_occurrence_uuid=payment_occurrence_uuid)
     await logic.delete_payment_occurrence(input_dto=input_dto)
+
+
+@routerV1.get(
+    path="/{user_uuid}/calendar",
+    response_model=GetCalendarOutputDTOV1,
+)
+@inject
+async def get_calendar(
+    user_uuid: UUID,
+    start_datetime: datetime = Query(description="Start of date range"),
+    end_datetime: datetime = Query(description="End of date range"),
+    payment_type: PaymentType | None = Query(default=None, description="Filter by payment type"),
+    logic: PaymentLogic = Depends(Provide[ServiceContainer.payment_logic]),
+) -> GetCalendarOutputDTOV1:
+    input_dto = GetCalendarInputDTOV1(
+        user_uuid=user_uuid,
+        start_datetime=start_datetime,
+        end_datetime=end_datetime,
+        payment_type=payment_type,
+    )
+    return await logic.get_calendar(input_dto=input_dto)
+
+
+@routerV1.get(
+    path="/{user_uuid}/upcoming-payment",
+    response_model=GetUpcomingPaymentOutputDTOV1,
+)
+@inject
+async def get_upcoming_payment(
+    user_uuid: UUID,
+    payment_type: PaymentType | None = Query(default=None, description="Filter by payment type"),
+    category_types: list[PaymentCategoryType] | None = Query(default=None, description="Filter by category types"),
+    logic: PaymentLogic = Depends(Provide[ServiceContainer.payment_logic]),
+) -> GetUpcomingPaymentOutputDTOV1:
+    input_dto = GetUpcomingPaymentInputDTOV1(
+        user_uuid=user_uuid,
+        payment_type=payment_type,
+        category_types=category_types,
+    )
+    return await logic.get_upcoming_payment(input_dto=input_dto)
+
+
+@routerV1.get(
+    path="/{user_uuid}/payments-with-occurrences",
+    response_model=GetPaymentsWithOccurrencesOutputDTOV1,
+)
+@inject
+async def get_payments_with_occurrences(
+    user_uuid: UUID,
+    payment_type: PaymentType | None = Query(default=None),
+    category_types: list[PaymentCategoryType] | None = Query(default=None),
+    recurrence_types: list[PaymentRecurrenceType] | None = Query(default=None),
+    is_active: bool | None = Query(default=None),
+    occurrence_count: int = Query(default=3, ge=1, le=10),
+    occurrence_status_type: PaymentOccurrenceStatusType | None = Query(default=None),
+    page: int = Query(default=1, ge=1),
+    page_size: int = Query(default=10, ge=1, le=100),
+    sort_column: str = Query(default="created_at"),
+    sort_order: SortOrderType = Query(default=SortOrderType.DESCENDING),
+    logic: PaymentLogic = Depends(Provide[ServiceContainer.payment_logic]),
+) -> GetPaymentsWithOccurrencesOutputDTOV1:
+    input_dto = GetPaymentsWithOccurrencesInputDTOV1.create(
+        user_uuid=user_uuid,
+        payment_type=payment_type,
+        category_types=category_types,
+        recurrence_types=recurrence_types,
+        is_active=is_active,
+        occurrence_count=occurrence_count,
+        occurrence_status_type=occurrence_status_type,
+        page=page,
+        page_size=page_size,
+        sort_column=sort_column,
+        sort_order=sort_order,
+    )
+    return await logic.get_payments_with_occurrences(input_dto=input_dto)

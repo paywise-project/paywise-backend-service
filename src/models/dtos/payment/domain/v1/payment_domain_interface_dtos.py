@@ -263,3 +263,92 @@ class PaymentOccurrenceItemDTOV1(BaseDTO):
 class SearchPaymentOccurrenceOutputDTOV1(BaseDTO):
     payment_occurrences: list[PaymentOccurrenceItemDTOV1]
     total: int
+
+
+class GetCalendarInputDTOV1(BaseDTO):
+    user_uuid: UUID
+    start_datetime: datetime
+    end_datetime: datetime
+    payment_type: PaymentType | None = None
+
+
+class CalendarItemDTOV1(BaseDTO):
+    due_datetime: datetime
+    payment_type: PaymentType
+    title: str
+    amount: int
+    status_type: PaymentOccurrenceStatusType | None
+
+
+class GetCalendarOutputDTOV1(BaseDTO):
+    items: list[CalendarItemDTOV1]
+
+
+class GetUpcomingPaymentInputDTOV1(BaseDTO):
+    user_uuid: UUID
+    payment_type: PaymentType | None = None
+    category_types: list[PaymentCategoryType] | None = None
+
+
+class GetUpcomingPaymentOutputDTOV1(BaseDTO):
+    payment_occurrence_uuid: UUID
+    payment_uuid: UUID
+    payment_type: PaymentType
+    title: str
+    amount: int
+    category_type: PaymentCategoryType
+    day_of_month_anchor: int | None
+    due_datetime: datetime
+
+
+class GetPaymentsWithOccurrencesInputDTOV1(SearchPaymentInputDTOV1):
+    occurrence_count: int = 3
+    occurrence_status_type: PaymentOccurrenceStatusType | None = None
+
+    @classmethod
+    def create(
+        cls,
+        user_uuid: UUID,
+        payment_type: PaymentType | None = None,
+        category_types: list[PaymentCategoryType] | None = None,
+        recurrence_types: list[PaymentRecurrenceType] | None = None,
+        is_active: bool | None = None,
+        start_datetime: Tuple[datetime, datetime] | None = None,
+        occurrence_count: int = 3,
+        occurrence_status_type: PaymentOccurrenceStatusType | None = None,
+        page: int = 1,
+        page_size: int = 10,
+        sort_column: str = "created_at",
+        sort_order: SortOrderType = SortOrderType.DESCENDING,
+    ):
+        pagination = PaginationDTO(page=page, page_size=page_size)
+        sort_info = SortDTO[str](column=sort_column, order=sort_order)
+        return cls(
+            user_uuid=user_uuid,
+            payment_type=payment_type,
+            category_types=category_types,
+            recurrence_types=recurrence_types,
+            is_active=is_active,
+            start_datetime=start_datetime,
+            occurrence_count=occurrence_count,
+            occurrence_status_type=occurrence_status_type,
+            pagination=pagination,
+            sort_info=sort_info,
+        )
+
+
+class OccurrenceSummaryDTOV1(BaseDTO):
+    payment_occurrence_uuid: UUID
+    due_datetime: datetime
+    status_type: PaymentOccurrenceStatusType | None
+    paid_at: datetime | None
+    index: int
+
+
+class PaymentWithOccurrencesDTOV1(PaymentItemDTOV1):
+    occurrences: list[OccurrenceSummaryDTOV1]
+
+
+class GetPaymentsWithOccurrencesOutputDTOV1(BaseDTO):
+    payments: list[PaymentWithOccurrencesDTOV1]
+    total: int

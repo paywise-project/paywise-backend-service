@@ -17,6 +17,12 @@ from src.models.dtos.payment.repository.payment_repository_interface_dtos import
     SearchPaymentOccurrenceResponseDTO,
     GetBalanceResponseDTO,
     GetBalanceQueryDTO,
+    GetCalendarQueryDTO,
+    GetCalendarResponseDTO,
+    GetUpcomingPaymentQueryDTO,
+    GetUpcomingPaymentResponseDTO,
+    GetPaymentOccurrencesForPaymentQueryDTO,
+    GetPaymentOccurrencesForPaymentResponseDTO,
 )
 from src.repositories.payment.adapters.payment_postgres_adapter import PaymentPostgresAdapter
 
@@ -63,3 +69,15 @@ class PaymentRepository:
 
     async def get_balance(self, input_dto: GetBalanceQueryDTO) -> GetBalanceResponseDTO:
         return await self._postgres_adapter.get_balance(input_dto=input_dto)
+
+    async def get_calendar(self, input_dto: GetCalendarQueryDTO) -> GetCalendarResponseDTO:
+        return await self._postgres_adapter.get_calendar(input_dto=input_dto)
+
+    async def get_upcoming_payment(self, input_dto: GetUpcomingPaymentQueryDTO) -> GetUpcomingPaymentResponseDTO | None:
+        return await self._postgres_adapter.get_upcoming_payment(input_dto=input_dto)
+
+    async def get_payment_occurrences_for_payment(
+        self,
+        input_dto: GetPaymentOccurrencesForPaymentQueryDTO,
+    ) -> list[GetPaymentOccurrencesForPaymentResponseDTO]:
+        return await self._postgres_adapter.get_payment_occurrences_for_payment(input_dto=input_dto)
