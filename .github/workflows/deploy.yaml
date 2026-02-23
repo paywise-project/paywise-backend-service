@@ -27,6 +27,6 @@ jobs:
             docker tag paywise-backend:$GITHUB_REF_NAME paywise-backend:latest
             docker compose -f docker-compose.prod.yml down
             docker compose -f docker-compose.prod.yml up -d
-            docker compose -f docker-compose.prod.yml exec -T paywise-backend poetry run alembic upgrade head
+            docker compose -f docker-compose.prod.yml exec -T paywise-backend alembic upgrade head
             docker image prune -f
             echo "Deployed $GITHUB_REF_NAME successfully"

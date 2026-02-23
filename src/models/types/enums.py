@@ -112,12 +112,17 @@ class KYCLevelType(str, Enum):
     TWO = "TWO"
 
 
-class ExpenseStatusType(str, Enum):
+class PaymentType(str, Enum):
+    EXPENSE = "EXPENSE"
+    INCOME = "INCOME"
+
+
+class PaymentOccurrenceStatusType(str, Enum):
     PAID = "PAID"
     UNPAID = "UNPAID"
 
 
-class ExpenseCategoryType(str, Enum):
+class PaymentCategoryType(str, Enum):
     RENT = "RENT"
     UTILITIES = "UTILITIES"
     LOAN = "LOAN"
@@ -125,4 +130,13 @@ class ExpenseCategoryType(str, Enum):
     TRANSPORT = "TRANSPORT"
     INSURANCE = "INSURANCE"
     SUBSCRIPTION = "SUBSCRIPTION"
+    SALARY = "SALARY"
+    FREELANCE = "FREELANCE"
     OTHER = "OTHER"
+
+
+class PaymentRecurrenceType(str, Enum):
+    ONE_TIME = "ONE_TIME"
+    WEEKLY = "WEEKLY"
+    MONTHLY = "MONTHLY"
+    CUSTOM = "CUSTOM"

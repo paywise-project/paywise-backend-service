@@ -12,7 +12,7 @@ from src.models.types.enums import *
 
 class CreateNotificationCommandDTO(BaseDTO):
     user_uuid: UUID
-    expense_uuid: UUID
+    payment_uuid: UUID
     title: StrictStr
     message: StrictStr
     notification_type: NotificationType
@@ -32,7 +32,7 @@ class GetNotificationQueryDTO(BaseDTO):
 class GetNotificationResponseDTO(BaseDTO):
     notification_uuid: UUID
     user_uuid: UUID
-    expense_uuid: UUID
+    payment_uuid: UUID
     title: StrictStr
     message: StrictStr
     notification_type: NotificationType
@@ -44,7 +44,7 @@ class GetNotificationResponseDTO(BaseDTO):
 class UpdateNotificationCommandDTO(BaseDTO):
     notification_uuid: UUID
     user_uuid: UUID | None = None
-    expense_uuid: UUID | None = None
+    payment_uuid: UUID | None = None
     title: StrictStr | None = None
     message: StrictStr | None = None
     notification_type: NotificationType | None = None
@@ -63,7 +63,7 @@ class SearchNotificationQueryDTO(BaseDTO):
     status_types: list[str] | None = None
     is_read: bool | None = None
     sent_at: Tuple[datetime, datetime] | None = None
-    expense_uuid: UUID | None = None
+    payment_uuid: UUID | None = None
     pagination: PaginationDTO
     sort_info: SortDTO[str]
 

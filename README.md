@@ -40,3 +40,7 @@ pre-commit autoupdate
 ```shell
 pre-commit run --all-files
 ```
+### deploy
+```shell
+make bump-patch message=""
+```
