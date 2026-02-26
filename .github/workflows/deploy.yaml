@@ -28,5 +28,7 @@ jobs:
             docker compose -f docker-compose.prod.yml down
             docker compose -f docker-compose.prod.yml up -d
             docker compose -f docker-compose.prod.yml exec -T paywise-backend alembic upgrade head
+            docker images | grep paywise-backend | grep -v latest | grep -v $GITHUB_REF_NAME | awk '{print $3}' | xargs -r docker rmi
             docker image prune -f
+            docker builder prune -f
             echo "Deployed $GITHUB_REF_NAME successfully"
