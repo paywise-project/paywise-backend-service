@@ -29,7 +29,7 @@ from src.repositories.storage.adapters.system_storage_adapter import SystemStora
 from src.repositories.storage.storage_repository import StorageRepository
 from src.repositories.user.adapters.user_postgres_adapter import UserPostgresAdapter
 from src.repositories.user.user_repository import UserRepository
-from src.services.scheduler.notification_scheduler_service import NotificationSchedulerService
+from src.services.scheduler.scheduler_service import SchedulerService
 
 
 class ServiceContainer(containers.DeclarativeContainer):
@@ -169,7 +169,7 @@ class ServiceContainer(containers.DeclarativeContainer):
     )
 
     scheduler_service = providers.ThreadSafeSingleton(
-        NotificationSchedulerService,
+        SchedulerService,
         scheduler_logic=scheduler_logic,
     )
     # endregion

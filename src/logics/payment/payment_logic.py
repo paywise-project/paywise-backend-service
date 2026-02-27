@@ -57,6 +57,8 @@ from src.models.dtos.payment.repository.payment_repository_interface_dtos import
     GetUpcomingPaymentQueryDTO,
     GetUpcomingPaymentResponseDTO,
     GetPaymentOccurrencesForPaymentQueryDTO,
+    ProcessOverdueOccurrencesResponseDTO,
+    OccurrenceForNotificationDTO,
 )
 from src.models.types.enums import *
 from src.repositories.payment.payment_repository import PaymentRepository
@@ -77,7 +79,7 @@ class PaymentLogic:
             day_of_month_anchor = j.day
 
         command = CreatePaymentCommandDTO(
-            **input_dto.model_dump(mode="json"),
+            **input_dto.model_dump(mode="json", exclude={"total_occurrences"}),
             day_of_month_anchor=day_of_month_anchor,
             total_occurrences=(
                 1 if input_dto.recurrence_type == PaymentRecurrenceType.ONE_TIME else input_dto.total_occurrences
@@ -319,3 +321,48 @@ class PaymentLogic:
             payments=payments_with_occurrences,
             total=payments_response.total,
         )
+
+    @async_postgres_sqlalchemy_atomic_decorator
+    async def process_overdue_occurrences(self) -> list[ProcessOverdueOccurrencesResponseDTO]:
+        return await self._repository.process_overdue_occurrences()
+
+    @async_postgres_sqlalchemy_atomic_decorator
+    async def extend_infinite_occurrences(self, processed: list[ProcessOverdueOccurrencesResponseDTO]) -> None:
+        infinite = [p for p in processed if p.total_occurrences is None and p.is_active]
+        one_year_ahead = datetime.utcnow() + timedelta(days=365)
+
+        for payment in infinite:
+            max_due = await self._repository.get_max_due_for_payment(payment_uuid=payment.payment_uuid)
+            if max_due is None or max_due.date() >= one_year_ahead.date():
+                continue
+
+            current = self._compute_next_due(
+                current=max_due,
+                recurrence_type=payment.recurrence_type,
+                interval_days=payment.interval_days,
+                day_of_month_anchor=payment.day_of_month_anchor,
+            )
+            next_index = payment.last_occurrence_index + 1
+
+            while current.date() <= one_year_ahead.date():
+                command = CreatePaymentOccurrenceInputDTOV1(
+                    payment_uuid=payment.payment_uuid,
+                    user_uuid=payment.user_uuid,
+                    due_datetime=current,
+                    status_type=(
+                        PaymentOccurrenceStatusType.UNPAID if payment.payment_type == PaymentType.EXPENSE else None
+                    ),
+                    occurrence_index=next_index,
+                )
+                await self.create_payment_occurrence(input_dto=command)
+                next_index += 1
+                current = self._compute_next_due(
+                    current=current,
+                    recurrence_type=payment.recurrence_type,
+                    interval_days=payment.interval_days,
+                    day_of_month_anchor=payment.day_of_month_anchor,
+                )
+
+    @async_postgres_sqlalchemy_atomic_decorator
+    async def get_occurrences_for_notifications(self) -> list[OccurrenceForNotificationDTO]:
+        return await self._repository.get_occurrences_for_notifications()

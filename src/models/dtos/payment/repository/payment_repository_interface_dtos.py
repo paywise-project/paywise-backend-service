@@ -204,3 +204,29 @@ class GetPaymentOccurrencesForPaymentResponseDTO(BaseDTO):
     status_type: PaymentOccurrenceStatusType | None
     paid_at: datetime | None
     occurrence_index: int
+
+
+class ProcessOverdueOccurrencesResponseDTO(BaseDTO):
+    payment_occurrence_uuid: UUID
+    payment_uuid: UUID
+    user_uuid: UUID
+    payment_type: PaymentType
+    recurrence_type: PaymentRecurrenceType
+    interval_days: int | None
+    day_of_month_anchor: int | None
+    total_occurrences: int | None
+    processed_occurrences: int
+    is_active: bool
+    last_occurrence_index: int
+
+
+class OccurrenceForNotificationDTO(BaseDTO):
+    payment_occurrence_uuid: UUID
+    payment_uuid: UUID
+    user_uuid: UUID
+    due_datetime: datetime
+    notify_on_day: bool
+    notify_day_before: bool
+    notify_week_before: bool
+    title: str
+    amount: int

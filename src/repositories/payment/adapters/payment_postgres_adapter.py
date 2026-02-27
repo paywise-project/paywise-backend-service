@@ -1,4 +1,5 @@
-from datetime import datetime
+from datetime import datetime, timedelta
+from uuid import UUID
 
 from archipy.adapters.base.sqlalchemy.adapters import SQLAlchemyFilterMixin
 from archipy.adapters.postgres.sqlalchemy.adapters import AsyncPostgresSQLAlchemyAdapter
@@ -34,6 +35,8 @@ from src.models.dtos.payment.repository.payment_repository_interface_dtos import
     GetUpcomingPaymentResponseDTO,
     GetPaymentOccurrencesForPaymentQueryDTO,
     GetPaymentOccurrencesForPaymentResponseDTO,
+    ProcessOverdueOccurrencesResponseDTO,
+    OccurrenceForNotificationDTO,
 )
 from src.models.entities import PaymentEntity, PaymentOccurrenceEntity
 from src.models.types.enums import PaymentType, PaymentOccurrenceStatusType
@@ -453,3 +456,115 @@ class PaymentPostgresAdapter(SQLAlchemyFilterMixin):
         rows = result.mappings().all()
 
         return [GetPaymentOccurrencesForPaymentResponseDTO(**row) for row in rows]
+
+    async def process_overdue_occurrences(self) -> list[ProcessOverdueOccurrencesResponseDTO]:
+        today = datetime.now().date()
+
+        query = (
+            select(
+                PaymentOccurrenceEntity.payment_occurrence_uuid,
+                PaymentOccurrenceEntity.payment_uuid,
+                PaymentOccurrenceEntity.user_uuid,
+                PaymentOccurrenceEntity.occurrence_index,
+                PaymentEntity.payment_type,
+                PaymentEntity.recurrence_type,
+                PaymentEntity.interval_days,
+                PaymentEntity.day_of_month_anchor,
+                PaymentEntity.total_occurrences,
+                PaymentEntity.processed_occurrences,
+            )
+            .select_from(PaymentOccurrenceEntity)
+            .join(PaymentEntity, PaymentEntity.payment_uuid == PaymentOccurrenceEntity.payment_uuid)
+            .where(
+                PaymentOccurrenceEntity.is_deleted.is_(False),
+                PaymentEntity.is_deleted.is_(False),
+                PaymentEntity.is_active.is_(True),
+                func.date(PaymentOccurrenceEntity.due_datetime) < today,
+                or_(
+                    PaymentOccurrenceEntity.status_type == PaymentOccurrenceStatusType.UNPAID,
+                    PaymentOccurrenceEntity.status_type.is_(None),
+                ),
+            )
+        )
+
+        result = await self._adapter.execute(statement=query)
+        rows = result.mappings().all()
+
+        results = []
+        for row in rows:
+            if row.payment_type == PaymentType.EXPENSE:
+                await self._adapter.execute(
+                    update(PaymentOccurrenceEntity)
+                    .where(PaymentOccurrenceEntity.payment_occurrence_uuid == row.payment_occurrence_uuid)
+                    .values(status_type=PaymentOccurrenceStatusType.PAID, paid_at=datetime.utcnow()),
+                )
+
+            new_processed = row.processed_occurrences + 1
+            is_active = True
+            if row.total_occurrences is not None and new_processed >= row.total_occurrences:
+                is_active = False
+
+            await self._adapter.execute(
+                update(PaymentEntity)
+                .where(PaymentEntity.payment_uuid == row.payment_uuid)
+                .values(processed_occurrences=new_processed, is_active=is_active),
+            )
+
+            results.append(
+                ProcessOverdueOccurrencesResponseDTO(
+                    payment_occurrence_uuid=row.payment_occurrence_uuid,
+                    payment_uuid=row.payment_uuid,
+                    user_uuid=row.user_uuid,
+                    payment_type=row.payment_type,
+                    recurrence_type=row.recurrence_type,
+                    interval_days=row.interval_days,
+                    day_of_month_anchor=row.day_of_month_anchor,
+                    total_occurrences=row.total_occurrences,
+                    processed_occurrences=new_processed,
+                    is_active=is_active,
+                    last_occurrence_index=row.occurrence_index,
+                ),
+            )
+
+        return results
+
+    async def get_occurrences_for_notifications(self) -> list[OccurrenceForNotificationDTO]:
+        today = datetime.now().date()
+        tomorrow = today + timedelta(days=1)
+        week_later = today + timedelta(days=7)
+
+        query = (
+            select(
+                PaymentOccurrenceEntity.payment_occurrence_uuid,
+                PaymentOccurrenceEntity.payment_uuid,
+                PaymentOccurrenceEntity.user_uuid,
+                PaymentOccurrenceEntity.due_datetime,
+                PaymentEntity.notify_on_day,
+                PaymentEntity.notify_day_before,
+                PaymentEntity.notify_week_before,
+                PaymentEntity.title,
+                PaymentEntity.amount,
+            )
+            .select_from(PaymentOccurrenceEntity)
+            .join(PaymentEntity, PaymentEntity.payment_uuid == PaymentOccurrenceEntity.payment_uuid)
+            .where(
+                PaymentOccurrenceEntity.is_deleted.is_(False),
+                PaymentEntity.is_deleted.is_(False),
+                PaymentEntity.is_active.is_(True),
+                PaymentEntity.payment_type == PaymentType.EXPENSE,
+                PaymentOccurrenceEntity.status_type == PaymentOccurrenceStatusType.UNPAID,
+                func.date(PaymentOccurrenceEntity.due_datetime).in_([today, tomorrow, week_later]),
+            )
+        )
+
+        result = await self._adapter.execute(statement=query)
+        rows = result.mappings().all()
+        return [OccurrenceForNotificationDTO(**row) for row in rows]
+
+    async def get_max_due_for_payment(self, payment_uuid: UUID) -> datetime | None:
+        query = select(func.max(PaymentOccurrenceEntity.due_datetime)).where(
+            PaymentOccurrenceEntity.payment_uuid == payment_uuid,
+            PaymentOccurrenceEntity.is_deleted.is_(False),
+        )
+        result = await self._adapter.execute(statement=query)
+        return result.scalar()

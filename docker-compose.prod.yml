@@ -51,5 +51,24 @@ services:
         max-size: "10m"
         max-file: "3"
     restart: unless-stopped
+  paywise-scheduler:
+    image: paywise-backend:latest
+    container_name: paywise-scheduler
+    env_file:
+      - variables.env
+    environment:
+      - PYTHONPATH=/app
+    command: python manage.py scheduler
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+    restart: unless-stopped
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_started
 volumes:
   postgres_data:

@@ -2,7 +2,7 @@ from datetime import datetime
 
 from archipy.helpers.decorators.sqlalchemy_atomic import async_postgres_sqlalchemy_atomic_decorator
 from uuid import UUID
-
+from sqlalchemy.exc import IntegrityError
 from src.models.dtos.notification.domain.v1.notification_domain_interface_dtos import (
     CreateNotificationInputDTOV1,
     CreateNotificationOutputDTOV1,
@@ -36,10 +36,16 @@ class NotificationLogic:
         self._repository: NotificationRepository = repository
 
     @async_postgres_sqlalchemy_atomic_decorator
-    async def create_notification(self, input_dto: CreateNotificationInputDTOV1) -> CreateNotificationOutputDTOV1:
-        command = CreateNotificationCommandDTO.model_validate(input_dto)
-        response: CreateNotificationResponseDTO = await self._repository.create_notification(input_dto=command)
-        return CreateNotificationOutputDTOV1.model_validate(obj=response)
+    async def create_notification(
+        self,
+        input_dto: CreateNotificationInputDTOV1,
+    ) -> CreateNotificationOutputDTOV1 | None:
+        try:
+            command = CreateNotificationCommandDTO.model_validate(input_dto)
+            response: CreateNotificationResponseDTO = await self._repository.create_notification(input_dto=command)
+            return CreateNotificationOutputDTOV1.model_validate(obj=response)
+        except IntegrityError:
+            return None
 
     @async_postgres_sqlalchemy_atomic_decorator
     async def get_notification(self, input_dto: GetNotificationInputDTOV1) -> GetNotificationOutputDTOV1:

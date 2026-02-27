@@ -9,27 +9,24 @@ from src.logics.scheduler.scheduler_logic import SchedulerLogic
 logger = logging.getLogger(__name__)
 
 
-class NotificationSchedulerService:
+class SchedulerService:
     def __init__(self, scheduler_logic: SchedulerLogic) -> None:
         self._scheduler_logic = scheduler_logic
         self._scheduler = AsyncIOScheduler()
 
     def start(self) -> None:
         self._scheduler.add_job(
-            self._scheduler_logic.create_notifications_for_upcoming_expenses,
-            # RuntimeConfig.SCHEDULER_TRIGGER_TYPE,
-            # hour=RuntimeConfig.SCHEDULER_HOUR,
-            # minute=RuntimeConfig.SCHEDULER_MINUTE,
-            "interval",
-            seconds=60,
-            id="daily_notification_check",
+            self._scheduler_logic.run_all_jobs,
+            RuntimeConfig.global_config().SCHEDULER_TRIGGER_TYPE,
+            hour=RuntimeConfig.global_config().SCHEDULER_HOUR,
+            minute=RuntimeConfig.global_config().SCHEDULER_MINUTE,
+            misfire_grace_time=300,
         )
         self._scheduler.start()
-        logger.info("Notification scheduler started")
+        logger.info("Scheduler started — runs daily at 00:05")
 
     async def run(self) -> None:
         self.start()
-        logger.info("Scheduler running, press Ctrl+C to stop")
         try:
             while True:
                 await asyncio.sleep(60)

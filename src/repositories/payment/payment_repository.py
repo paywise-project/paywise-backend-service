@@ -1,3 +1,6 @@
+from datetime import datetime
+from uuid import UUID
+
 from src.models.dtos.payment.repository.payment_repository_interface_dtos import (
     CreatePaymentCommandDTO,
     CreatePaymentResponseDTO,
@@ -23,6 +26,8 @@ from src.models.dtos.payment.repository.payment_repository_interface_dtos import
     GetUpcomingPaymentResponseDTO,
     GetPaymentOccurrencesForPaymentQueryDTO,
     GetPaymentOccurrencesForPaymentResponseDTO,
+    ProcessOverdueOccurrencesResponseDTO,
+    OccurrenceForNotificationDTO,
 )
 from src.repositories.payment.adapters.payment_postgres_adapter import PaymentPostgresAdapter
 
@@ -81,3 +86,12 @@ class PaymentRepository:
         input_dto: GetPaymentOccurrencesForPaymentQueryDTO,
     ) -> list[GetPaymentOccurrencesForPaymentResponseDTO]:
         return await self._postgres_adapter.get_payment_occurrences_for_payment(input_dto=input_dto)
+
+    async def process_overdue_occurrences(self) -> list[ProcessOverdueOccurrencesResponseDTO]:
+        return await self._postgres_adapter.process_overdue_occurrences()
+
+    async def get_occurrences_for_notifications(self) -> list[OccurrenceForNotificationDTO]:
+        return await self._postgres_adapter.get_occurrences_for_notifications()
+
+    async def get_max_due_for_payment(self, payment_uuid: UUID) -> datetime | None:
+        return await self._postgres_adapter.get_max_due_for_payment(payment_uuid=payment_uuid)
