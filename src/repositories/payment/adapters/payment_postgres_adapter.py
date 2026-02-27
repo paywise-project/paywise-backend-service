@@ -428,38 +428,26 @@ class PaymentPostgresAdapter(SQLAlchemyFilterMixin):
     ) -> list[GetPaymentOccurrencesForPaymentResponseDTO]:
         now = datetime.now().date()
 
-        row_number = (
-            func.row_number()
-            .over(
-                partition_by=PaymentOccurrenceEntity.payment_uuid,
-                order_by=PaymentOccurrenceEntity.due_datetime.asc(),
-            )
-            .label("index")
-        )
-
-        subquery = (
+        query = (
             select(
                 PaymentOccurrenceEntity.payment_occurrence_uuid,
                 PaymentOccurrenceEntity.due_datetime,
                 PaymentOccurrenceEntity.status_type,
                 PaymentOccurrenceEntity.paid_at,
-                row_number,
-            ).where(
+                PaymentOccurrenceEntity.occurrence_index,
+            )
+            .where(
                 PaymentOccurrenceEntity.is_deleted.is_(False),
                 PaymentOccurrenceEntity.payment_uuid == input_dto.payment_uuid,
                 PaymentOccurrenceEntity.user_uuid == input_dto.user_uuid,
+                PaymentOccurrenceEntity.due_datetime >= now,
             )
-        ).subquery()
-
-        query = (
-            select(subquery)
-            .where(subquery.c.due_datetime >= now)
-            .order_by(subquery.c.due_datetime.asc())
+            .order_by(PaymentOccurrenceEntity.due_datetime.asc())
             .limit(input_dto.occurrence_count)
         )
 
         if input_dto.status_type is not None:
-            query = query.where(subquery.c.status_type == input_dto.status_type)
+            query = query.where(PaymentOccurrenceEntity.status_type == input_dto.status_type)
 
         result = await self._adapter.execute(statement=query)
         rows = result.mappings().all()

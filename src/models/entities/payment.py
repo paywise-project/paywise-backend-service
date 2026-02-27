@@ -55,6 +55,7 @@ class PaymentOccurrenceEntity(UpdatableDeletableEntity):
     due_datetime: Mapped[datetime] = mapped_column(DateTime, nullable=False)
     status_type: Mapped[Optional[str]] = mapped_column(VARCHAR(20), nullable=True)
     paid_at: Mapped[Optional[datetime]] = mapped_column(DateTime, nullable=True)
+    occurrence_index: Mapped[int] = mapped_column(Integer, nullable=False)
 
     payment = relationship("PaymentEntity", back_populates="occurrences")
     user = relationship("UserEntity", back_populates="payment_occurrences")

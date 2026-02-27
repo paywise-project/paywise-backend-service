@@ -170,6 +170,7 @@ class CreatePaymentOccurrenceRestInputDTOV1(BaseDTO):
     due_datetime: datetime
     status_type: PaymentOccurrenceStatusType | None = None
     paid_at: datetime | None = None
+    occurrence_index: int
 
 
 class CreatePaymentOccurrenceInputDTOV1(CreatePaymentOccurrenceRestInputDTOV1):
@@ -258,6 +259,7 @@ class PaymentOccurrenceItemDTOV1(BaseDTO):
     due_datetime: datetime
     status_type: PaymentOccurrenceStatusType | None = None
     paid_at: datetime | None = None
+    occurrence_index: int
 
 
 class SearchPaymentOccurrenceOutputDTOV1(BaseDTO):
@@ -342,7 +344,7 @@ class OccurrenceSummaryDTOV1(BaseDTO):
     due_datetime: datetime
     status_type: PaymentOccurrenceStatusType | None
     paid_at: datetime | None
-    index: int
+    occurrence_index: int
 
 
 class PaymentWithOccurrencesDTOV1(PaymentItemDTOV1):

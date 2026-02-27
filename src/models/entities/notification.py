@@ -15,9 +15,9 @@ class NotificationEntity(UpdatableDeletableEntity):
     pk_uuid = Synonym("notification_uuid")
 
     user_uuid: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), ForeignKey("users.user_uuid"), nullable=False)
-    payment_uuid: Mapped[uuid.UUID] = mapped_column(
+    payment_occurrence_uuid: Mapped[uuid.UUID] = mapped_column(
         UUID(as_uuid=True),
-        ForeignKey("payments.payment_uuid"),
+        ForeignKey("payment_occurrences.payment_occurrence_uuid"),
         nullable=False,
     )
 
@@ -30,4 +30,4 @@ class NotificationEntity(UpdatableDeletableEntity):
     is_read: Mapped[bool] = mapped_column(Boolean, nullable=False, default=False)
 
     user = relationship("UserEntity", back_populates="notifications")
-    payment = relationship("PaymentEntity", back_populates="notifications")
+    payment_occurrence = relationship("PaymentOccurrenceEntity", back_populates="notifications")

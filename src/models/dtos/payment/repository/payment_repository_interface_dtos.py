@@ -92,6 +92,7 @@ class CreatePaymentOccurrenceCommandDTO(BaseDTO):
     user_uuid: UUID
     due_datetime: datetime
     status_type: PaymentOccurrenceStatusType | None = None
+    occurrence_index: int
 
 
 class CreatePaymentOccurrenceResponseDTO(BaseDTO):
@@ -110,6 +111,7 @@ class GetPaymentOccurrenceResponseDTO(BaseDTO):
     due_datetime: datetime
     status_type: PaymentOccurrenceStatusType | None = None
     paid_at: datetime | None = None
+    occurrence_index: int
 
 
 class UpdatePaymentOccurrenceCommandDTO(BaseDTO):
@@ -201,4 +203,4 @@ class GetPaymentOccurrencesForPaymentResponseDTO(BaseDTO):
     due_datetime: datetime
     status_type: PaymentOccurrenceStatusType | None
     paid_at: datetime | None
-    index: int
+    occurrence_index: int

@@ -79,7 +79,9 @@ class PaymentLogic:
         command = CreatePaymentCommandDTO(
             **input_dto.model_dump(mode="json"),
             day_of_month_anchor=day_of_month_anchor,
-            processed_occurrences=0,
+            total_occurrences=(
+                1 if input_dto.recurrence_type == PaymentRecurrenceType.ONE_TIME else input_dto.total_occurrences
+            ),
         )
 
         response: CreatePaymentResponseDTO = await self._repository.create_payment(input_dto=command)
@@ -135,12 +137,13 @@ class PaymentLogic:
                     day_of_month_anchor=day_of_month_anchor,
                 )
 
-        for due_datetime in occurrences:
+        for index, due_datetime in enumerate(occurrences, start=1):
             command = CreatePaymentOccurrenceInputDTOV1(
                 payment_uuid=payment_uuid,
                 user_uuid=user_uuid,
                 due_datetime=due_datetime,
                 status_type=PaymentOccurrenceStatusType.UNPAID if payment_type == PaymentType.EXPENSE else None,
+                occurrence_index=index,
             )
             await self.create_payment_occurrence(input_dto=command)
 
@@ -300,7 +303,7 @@ class PaymentLogic:
                     due_datetime=occ.due_datetime,
                     status_type=occ.status_type,
                     paid_at=occ.paid_at,
-                    index=occ.index,
+                    occurrence_index=occ.occurrence_index,
                 )
                 for occ in occurrences_response
             ]

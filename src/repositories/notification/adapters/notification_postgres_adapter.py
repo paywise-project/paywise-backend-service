@@ -94,10 +94,10 @@ class NotificationPostgresAdapter(SQLAlchemyFilterMixin):
                 operation=FilterOperationType.LESS_THAN_OR_EQUAL,
             )
 
-        if input_dto.payment_uuid:
+        if input_dto.payment_occurrence_uuid:
             query = self._apply_filter(
                 query=query,
-                field=NotificationEntity.payment_uuid,
+                field=NotificationEntity.payment_occurrence_uuid,
                 value=input_dto.expense_uuid,
                 operation=FilterOperationType.EQUAL,
             )
