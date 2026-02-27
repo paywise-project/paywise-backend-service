@@ -370,7 +370,7 @@ class PaymentPostgresAdapter(SQLAlchemyFilterMixin):
         return GetCalendarResponseDTO(items=[CalendarItemDTO(**row) for row in rows])
 
     async def get_upcoming_payment(self, input_dto: GetUpcomingPaymentQueryDTO) -> GetUpcomingPaymentResponseDTO | None:
-        now = datetime.now()
+        now = datetime.now().date()
 
         where_conditions = [
             PaymentOccurrenceEntity.is_deleted.is_(False),
@@ -426,7 +426,7 @@ class PaymentPostgresAdapter(SQLAlchemyFilterMixin):
         self,
         input_dto: GetPaymentOccurrencesForPaymentQueryDTO,
     ) -> list[GetPaymentOccurrencesForPaymentResponseDTO]:
-        now = datetime.now()
+        now = datetime.now().date()
 
         row_number = (
             func.row_number()

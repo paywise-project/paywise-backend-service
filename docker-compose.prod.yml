@@ -1,4 +1,3 @@
-version: '3.8'
 services:
   paywise-backend:
     image: paywise-backend:latest
