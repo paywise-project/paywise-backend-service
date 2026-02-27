@@ -36,7 +36,6 @@ class PaymentEntity(UpdatableDeletableEntity):
 
     user = relationship("UserEntity", back_populates="payments")
     occurrences = relationship("PaymentOccurrenceEntity", back_populates="payment")
-    notifications = relationship("NotificationEntity", back_populates="payment")
 
 
 class PaymentOccurrenceEntity(UpdatableDeletableEntity):
@@ -59,3 +58,4 @@ class PaymentOccurrenceEntity(UpdatableDeletableEntity):
 
     payment = relationship("PaymentEntity", back_populates="occurrences")
     user = relationship("UserEntity", back_populates="payment_occurrences")
+    notifications = relationship("NotificationEntity", back_populates="payment_occurrence")

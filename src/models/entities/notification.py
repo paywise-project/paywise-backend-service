@@ -6,10 +6,14 @@ from archipy.models.entities import UpdatableDeletableEntity
 from sqlalchemy import Boolean, Column, DateTime, ForeignKey, Text
 from sqlalchemy.dialects.postgresql import UUID, VARCHAR
 from sqlalchemy.orm import Mapped, mapped_column, relationship, Synonym
+from sqlalchemy.sql.schema import UniqueConstraint
 
 
 class NotificationEntity(UpdatableDeletableEntity):
     __tablename__ = "notifications"
+    __table_args__ = (
+        UniqueConstraint("payment_occurrence_uuid", "notification_type", name="uq_notification_occurrence_type"),
+    )
 
     notification_uuid = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
     pk_uuid = Synonym("notification_uuid")
