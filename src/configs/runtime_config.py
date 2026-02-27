@@ -15,8 +15,8 @@ class RuntimeConfig(BaseConfig):
     # REDIS_URL: str = "redis://localhost:6379/0"
     REDIS_URL: str = "redis://redis:6379/0"
     SCHEDULER_TRIGGER_TYPE: str = "cron"
-    SCHEDULER_HOUR: int = 0
-    SCHEDULER_MINUTE: int = 5
+    SCHEDULER_HOUR: int = 2
+    SCHEDULER_MINUTE: int = 30
 
 
 BaseConfig.set_global(RuntimeConfig())
